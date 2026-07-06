@@ -418,6 +418,96 @@
             cursor: not-allowed;
         }
 
+        /* 锁定遮罩 */
+        .lock-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.78);
+            z-index: 996;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fade-in 0.3s ease;
+        }
+        .lock-modal {
+            background: #fffef9;
+            border-radius: var(--radius-lg);
+            padding: 28px 22px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            animation: pop-in 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .lock-modal .lock-icon {
+            font-size: 3.5rem;
+            margin-bottom: 8px;
+        }
+        .lock-modal .lock-title {
+            font-weight: 900;
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+        .lock-modal .lock-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 14px;
+        }
+        .lock-modal .lock-countdown {
+            font-size: 2.4rem;
+            font-weight: 900;
+            color: var(--text);
+            letter-spacing: 2px;
+            margin: 10px 0;
+        }
+        .lock-modal .lock-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+            margin-top: 16px;
+        }
+        .btn-unlock-ad {
+            background: linear-gradient(135deg, #ff6b6b, #e74c3c);
+            color: #fff;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 26px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: all var(--transition);
+            box-shadow: 0 4px 14px rgba(231, 76, 60, 0.35);
+            width: 80%;
+            text-align: center;
+        }
+        .btn-unlock-ad:hover {
+            background: #c0392b;
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.5);
+        }
+        .btn-wait {
+            background: #f5f0e8;
+            color: var(--text);
+            border: 2px solid rgba(180, 150, 110, 0.3);
+            border-radius: 25px;
+            padding: 10px 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: all var(--transition);
+            width: 80%;
+            text-align: center;
+        }
+        .btn-wait:hover {
+            background: #ede5d8;
+        }
+
         .ad-overlay {
             position: fixed;
             top: 0;
@@ -431,10 +521,6 @@
             justify-content: center;
             animation: fade-in 0.3s ease;
         }
-        @keyframes fade-in {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
         .ad-modal {
             background: #fffef9;
             border-radius: var(--radius-lg);
@@ -444,366 +530,75 @@
             width: 90%;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
             animation: pop-in 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
         }
-        @keyframes pop-in {
-            from { transform: scale(0.7); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-        .ad-modal .ad-icon {
-            font-size: 3rem;
-            margin-bottom: 8px;
-        }
-        .ad-modal .ad-title {
-            font-weight: 700;
-            font-size: 1.2rem;
-            color: var(--text);
-            margin-bottom: 6px;
-        }
-        .ad-modal .ad-subtitle {
-            font-size: 0.85rem;
-            color: var(--text-light);
-            margin-bottom: 16px;
-        }
-        .ad-modal .ad-countdown {
-            font-size: 2.8rem;
-            font-weight: 900;
-            color: var(--primary);
-            letter-spacing: 2px;
-            margin: 10px 0;
-            font-family: var(--font-sans);
-        }
-        .ad-modal .ad-progress-bar {
-            width: 100%;
-            height: 6px;
-            background: #e8e0d5;
-            border-radius: 3px;
-            overflow: hidden;
-            margin: 10px 0 16px;
-        }
-        .ad-modal .ad-progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #e74c3c, #f39c12);
-            border-radius: 3px;
-            transition: width 0.95s linear;
-        }
+        .ad-modal .ad-icon { font-size: 3rem; margin-bottom: 8px; }
+        .ad-modal .ad-title { font-weight: 700; font-size: 1.2rem; color: var(--text); margin-bottom: 6px; }
+        .ad-modal .ad-subtitle { font-size: 0.85rem; color: var(--text-light); margin-bottom: 16px; }
+        .ad-modal .ad-countdown { font-size: 2.8rem; font-weight: 900; color: var(--primary); letter-spacing: 2px; margin: 10px 0; font-family: var(--font-sans); }
+        .ad-modal .ad-progress-bar { width: 100%; height: 6px; background: #e8e0d5; border-radius: 3px; overflow: hidden; margin: 10px 0 16px; }
+        .ad-modal .ad-progress-fill { height: 100%; background: linear-gradient(90deg, #e74c3c, #f39c12); border-radius: 3px; transition: width 0.95s linear; }
         .ad-modal .btn-close-ad {
-            display: inline-block;
-            padding: 10px 28px;
-            border-radius: 25px;
-            font-weight: 700;
-            font-size: 0.95rem;
-            cursor: pointer;
-            border: none;
-            background: #4caf50;
-            color: #fff;
-            letter-spacing: 1px;
-            transition: all var(--transition);
-            opacity: 0;
-            pointer-events: none;
-            transform: translateY(8px);
-            transition: all 0.35s ease;
+            display: inline-block; padding: 10px 28px; border-radius: 25px; font-weight: 700; font-size: 0.95rem; cursor: pointer; border: none;
+            background: #4caf50; color: #fff; letter-spacing: 1px; transition: all var(--transition); opacity: 0; pointer-events: none; transform: translateY(8px);
         }
-        .ad-modal .btn-close-ad.visible {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateY(0);
-        }
-        .ad-modal .btn-close-ad:hover {
-            background: #388e3c;
-            box-shadow: 0 6px 18px rgba(76, 175, 80, 0.4);
-        }
+        .ad-modal .btn-close-ad.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+        .ad-modal .btn-close-ad:hover { background: #388e3c; box-shadow: 0 6px 18px rgba(76, 175, 80, 0.4); }
 
         .result-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.75);
-            z-index: 998;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: fade-in 0.3s ease;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); z-index: 998;
+            display: flex; align-items: center; justify-content: center; animation: fade-in 0.3s ease;
         }
         .result-modal {
-            background: #fffef9;
-            border-radius: var(--radius-lg);
-            padding: 28px 22px;
-            text-align: center;
-            max-width: 420px;
-            width: 90%;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-            animation: pop-in 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: #fffef9; border-radius: var(--radius-lg); padding: 28px 22px; text-align: center; max-width: 420px; width: 90%;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4); animation: pop-in 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .result-modal .result-icon {
-            font-size: 4rem;
-            margin-bottom: 6px;
-        }
-        .result-modal .result-title {
-            font-weight: 900;
-            font-size: 1.5rem;
-            margin-bottom: 4px;
-            letter-spacing: 1px;
-        }
-        .result-modal .result-subtitle {
-            font-size: 0.9rem;
-            color: var(--text-light);
-            margin-bottom: 14px;
-        }
-        .result-modal .result-score {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--gold);
-            margin-bottom: 16px;
-        }
-        .result-modal .result-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-        }
-        .btn-result {
-            padding: 11px 22px;
-            border-radius: 25px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            cursor: pointer;
-            border: none;
-            letter-spacing: 0.5px;
-            transition: all var(--transition);
-            font-family: var(--font-sans);
-        }
-        .btn-next {
-            background: #4caf50;
-            color: #fff;
-            box-shadow: 0 4px 14px rgba(76, 175, 80, 0.35);
-        }
-        .btn-next:hover {
-            background: #388e3c;
-            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.45);
-        }
-        .btn-retry {
-            background: #ff9800;
-            color: #fff;
-            box-shadow: 0 4px 14px rgba(255, 152, 0, 0.35);
-        }
-        .btn-retry:hover {
-            background: #f57c00;
-            box-shadow: 0 6px 20px rgba(255, 152, 0, 0.45);
-        }
-        .btn-quit {
-            background: #f5f0e8;
-            color: var(--text);
-            border: 2px solid rgba(180, 150, 110, 0.3);
-        }
-        .btn-quit:hover {
-            background: #ede5d8;
-        }
+        .result-modal .result-icon { font-size: 4rem; margin-bottom: 6px; }
+        .result-modal .result-title { font-weight: 900; font-size: 1.5rem; margin-bottom: 4px; letter-spacing: 1px; }
+        .result-modal .result-subtitle { font-size: 0.9rem; color: var(--text-light); margin-bottom: 14px; }
+        .result-modal .result-score { font-size: 1.1rem; font-weight: 700; color: var(--gold); margin-bottom: 16px; }
+        .result-modal .result-buttons { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+        .btn-result { padding: 11px 22px; border-radius: 25px; font-weight: 700; font-size: 0.9rem; cursor: pointer; border: none; letter-spacing: 0.5px; transition: all var(--transition); font-family: var(--font-sans); }
+        .btn-next { background: #4caf50; color: #fff; box-shadow: 0 4px 14px rgba(76, 175, 80, 0.35); }
+        .btn-next:hover { background: #388e3c; box-shadow: 0 6px 20px rgba(76, 175, 80, 0.45); }
+        .btn-retry { background: #ff9800; color: #fff; box-shadow: 0 4px 14px rgba(255, 152, 0, 0.35); }
+        .btn-retry:hover { background: #f57c00; box-shadow: 0 6px 20px rgba(255, 152, 0, 0.45); }
+        .btn-quit { background: #f5f0e8; color: var(--text); border: 2px solid rgba(180, 150, 110, 0.3); }
+        .btn-quit:hover { background: #ede5d8; }
 
-        .level-select-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 997;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: fade-in 0.3s ease;
-        }
-        .level-select-modal {
-            background: #fffef9;
-            border-radius: var(--radius-lg);
-            padding: 20px 16px;
-            max-width: 500px;
-            width: 92%;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
-            animation: pop-in 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .level-select-modal h3 {
-            text-align: center;
-            font-size: 1.3rem;
-            font-weight: 900;
-            margin-bottom: 14px;
-            letter-spacing: 2px;
-            color: var(--text);
-        }
-        .level-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
-            gap: 10px;
-        }
-        .level-cell {
-            aspect-ratio: 1 / 1;
-            border-radius: 14px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 0.85rem;
-            transition: all var(--transition);
-            border: 2px solid rgba(180, 150, 110, 0.25);
-            background: #fffef9;
-            position: relative;
-            font-family: var(--font-serif);
-            -webkit-tap-highlight-color: transparent;
-        }
-        .level-cell:hover {
-            border-color: var(--gold);
-            box-shadow: 0 4px 14px rgba(212, 160, 23, 0.2);
-            transform: translateY(-3px);
-        }
-        .level-cell.completed {
-            background: #e8f5e9;
-            border-color: #4caf50;
-            color: #2e7d32;
-        }
-        .level-cell.completed::after {
-            content: '✓';
-            position: absolute;
-            top: 4px;
-            right: 8px;
-            font-size: 0.7rem;
-            color: #4caf50;
-            font-weight: 900;
-        }
-        .level-cell.current {
-            border-color: var(--primary);
-            border-width: 3px;
-            box-shadow: 0 0 0 4px rgba(192, 57, 43, 0.12);
-            background: #fff5f5;
-        }
-        .level-cell.locked {
-            opacity: 0.4;
-            pointer-events: none;
-            background: #f5f0ea;
-            color: #c5b8a5;
-        }
-        .level-cell .level-num {
-            font-size: 0.7rem;
-            font-family: var(--font-sans);
-            color: var(--text-light);
-        }
-        .level-cell .level-char {
-            font-size: 1.4rem;
-            line-height: 1;
-        }
-        .level-cell .level-stars {
-            font-size: 0.55rem;
-            letter-spacing: -1px;
-        }
-        .close-level-select {
-            display: block;
-            margin: 16px auto 0;
-            padding: 10px 28px;
-            border-radius: 25px;
-            font-weight: 700;
-            cursor: pointer;
-            border: none;
-            background: #f5f0e8;
-            color: var(--text);
-            letter-spacing: 1px;
-            font-family: var(--font-sans);
-            transition: all var(--transition);
-        }
-        .close-level-select:hover {
-            background: #ede5d8;
-        }
+        .level-select-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 997; display: flex; align-items: center; justify-content: center; animation: fade-in 0.3s ease; }
+        .level-select-modal { background: #fffef9; border-radius: var(--radius-lg); padding: 20px 16px; max-width: 500px; width: 92%; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.35); }
+        .level-select-modal h3 { text-align: center; font-size: 1.3rem; font-weight: 900; margin-bottom: 14px; }
+        .level-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px,1fr)); gap: 10px; }
+        .level-cell { aspect-ratio: 1/1; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-weight: 700; font-size: 0.85rem; transition: all var(--transition); border: 2px solid rgba(180,150,110,0.25); background: #fffef9; position: relative; font-family: var(--font-serif); }
+        .level-cell:hover { border-color: var(--gold); box-shadow: 0 4px 14px rgba(212,160,23,0.2); transform: translateY(-3px); }
+        .level-cell.completed { background: #e8f5e9; border-color: #4caf50; color: #2e7d32; }
+        .level-cell.completed::after { content: '✓'; position: absolute; top: 4px; right: 8px; font-size: 0.7rem; color: #4caf50; font-weight: 900; }
+        .level-cell.current { border-color: var(--primary); border-width: 3px; box-shadow: 0 0 0 4px rgba(192,57,43,0.12); background: #fff5f5; }
+        .level-cell.locked { opacity: 0.4; pointer-events: none; background: #f5f0ea; color: #c5b8a5; }
+        .level-cell .level-num { font-size: 0.7rem; font-family: var(--font-sans); color: var(--text-light); }
+        .level-cell .level-char { font-size: 1.4rem; line-height: 1; }
+        .level-cell .level-stars { font-size: 0.55rem; letter-spacing: -1px; }
+        .close-level-select { display: block; margin: 16px auto 0; padding: 10px 28px; border-radius: 25px; font-weight: 700; cursor: pointer; border: none; background: #f5f0e8; color: var(--text); }
 
-        .toast {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #3e2f1c;
-            color: #fff;
-            padding: 10px 22px;
-            border-radius: 25px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            z-index: 1000;
-            pointer-events: none;
-            animation: toast-in 0.4s ease, toast-out 0.4s ease 1.6s forwards;
-            letter-spacing: 0.5px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-        }
-        @keyframes toast-in {
-            from { opacity: 0; transform: translateX(-50%) translateY(-30px); }
-            to { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
-        @keyframes toast-out {
-            from { opacity: 1; transform: translateX(-50%) translateY(0); }
-            to { opacity: 0; transform: translateX(-50%) translateY(-30px); }
-        }
+        .toast { position: fixed; top:20px; left:50%; transform:translateX(-50%); background:#3e2f1c; color:#fff; padding:10px 22px; border-radius:25px; font-weight:700; font-size:0.9rem; z-index:1000; pointer-events:none; animation:toast-in 0.4s ease, toast-out 0.4s ease 1.6s forwards; }
+        @keyframes toast-in { from{opacity:0;transform:translateX(-50%) translateY(-30px);} to{opacity:1;transform:translateX(-50%) translateY(0);} }
+        @keyframes toast-out { from{opacity:1;transform:translateX(-50%) translateY(0);} to{opacity:0;transform:translateX(-50%) translateY(-30px);} }
 
         @media (max-width: 600px) {
-            .game-main {
-                flex-direction: column;
-                align-items: center;
-                gap: 12px;
-                padding: 12px;
-            }
-            .big-char-zone {
-                max-width: 260px;
-                flex: none;
-            }
-            .big-char-wrapper {
-                max-width: 260px;
-                max-height: 260px;
-            }
-            .right-panel {
-                width: 100%;
-                flex: none;
-            }
-            .found-cell {
-                width: var(--cell-size-mobile);
-                height: var(--cell-size-mobile);
-                font-size: 1.1rem;
-            }
-            .candidate-chip {
-                min-width: 38px;
-                height: 40px;
-                padding: 5px 10px;
-                font-size: 0.95rem;
-                border-radius: 20px;
-            }
-            .top-bar {
-                padding: 10px 12px;
-                gap: 6px;
-                font-size: 0.85rem;
-            }
-            .top-bar .timer {
-                font-size: 0.95rem;
-                padding: 4px 10px;
-                min-width: 60px;
-            }
-            .btn {
-                padding: 8px 14px;
-                font-size: 0.8rem;
-            }
-            .bottom-bar {
-                gap: 8px;
-                padding: 10px 12px;
-            }
-            .ad-modal {
-                padding: 20px 16px;
-            }
-            .ad-modal .ad-countdown {
-                font-size: 2.2rem;
-            }
+            .game-main { flex-direction: column; align-items: center; gap:12px; padding:12px; }
+            .big-char-zone { max-width:260px; flex:none; }
+            .big-char-wrapper { max-width:260px; max-height:260px; }
+            .right-panel { width:100%; flex:none; }
+            .found-cell { width:var(--cell-size-mobile); height:var(--cell-size-mobile); font-size:1.1rem; }
+            .candidate-chip { min-width:38px; height:40px; padding:5px 10px; font-size:0.95rem; border-radius:20px; }
+            .top-bar { padding:10px 12px; gap:6px; font-size:0.85rem; }
+            .top-bar .timer { font-size:0.95rem; padding:4px 10px; min-width:60px; }
+            .btn { padding:8px 14px; font-size:0.8rem; }
+            .bottom-bar { gap:8px; padding:10px 12px; }
         }
     </style>
 </head>
 <body>
-
     <div class="app-container" id="appContainer">
         <div class="top-bar">
             <div class="level-info">
@@ -839,11 +634,26 @@
         </div>
 
         <div class="bottom-bar">
-            <button class="btn btn-hint" id="btnHint" title="看广告获得提示">💡 提示</button>
+            <button class="btn btn-hint" id="btnHint">💡 提示</button>
             <button class="btn btn-levels" id="btnLevels">📂 关卡选择</button>
         </div>
     </div>
 
+    <!-- 锁定遮罩 -->
+    <div class="lock-overlay" id="lockOverlay" style="display:none;">
+        <div class="lock-modal">
+            <div class="lock-icon">🔒</div>
+            <div class="lock-title">关卡已锁定</div>
+            <div class="lock-subtitle" id="lockReason">错误次数过多，请等待或观看广告</div>
+            <div class="lock-countdown" id="lockCountdown">02:00</div>
+            <div class="lock-buttons">
+                <button class="btn-unlock-ad" id="btnUnlockAd">📺 看广告立即解锁</button>
+                <button class="btn-wait" id="btnWaitUnlock">⏳ 等待倒计时结束</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 广告遮罩 -->
     <div class="ad-overlay" id="adOverlay" style="display:none;">
         <div class="ad-modal">
             <div class="ad-icon">📺</div>
@@ -857,10 +667,12 @@
         </div>
     </div>
 
+    <!-- 结果弹窗 -->
     <div class="result-overlay" id="resultOverlay" style="display:none;">
         <div class="result-modal" id="resultModal"></div>
     </div>
 
+    <!-- 关卡选择 -->
     <div class="level-select-overlay" id="levelSelectOverlay" style="display:none;">
         <div class="level-select-modal" id="levelSelectModal">
             <h3>📂 选择关卡</h3>
@@ -871,18 +683,15 @@
 
     <div id="toastContainer"></div>
 
-    <!-- 加载关卡数据（独立文件） -->
     <script src="level.js"></script>
-
     <script>
         (function() {
-            // 确保 levelData 已从 level.js 中全局加载
             if (typeof levelData === 'undefined') {
                 alert('关卡数据加载失败，请检查 level.js 文件是否存在。');
                 return;
             }
 
-            // ==================== 游戏状态 ====================
+            // ========== 游戏状态 ==========
             let currentLevelIndex = 0;
             let totalScore = 0;
             let foundSet = new Set();
@@ -899,9 +708,13 @@
             let adCountdownTimer = null;
             let completedLevels = new Set();
 
-            // ==================== DOM引用 ====================
+            // 错误惩罚相关
+            let wrongAttempts = 0;          // 本关累计错误次数
+            let lockUntil = null;          // 锁定截止时间戳 (毫秒)
+            let lockTimerInterval = null;  // 锁定倒计时刷新
+
+            // ========== DOM ==========
             const $ = (sel) => document.querySelector(sel);
-            const appContainer = $('#appContainer');
             const bigCharWrapper = $('#bigCharWrapper');
             const bigCharCanvas = $('#bigCharCanvas');
             const ctx = bigCharCanvas.getContext('2d');
@@ -926,60 +739,51 @@
             const levelGrid = $('#levelGrid');
             const btnCloseLevelSelect = $('#btnCloseLevelSelect');
             const toastContainer = $('#toastContainer');
+            const lockOverlay = $('#lockOverlay');
+            const lockCountdown = $('#lockCountdown');
+            const lockReason = $('#lockReason');
+            const btnUnlockAd = $('#btnUnlockAd');
+            const btnWaitUnlock = $('#btnWaitUnlock');
 
-            // ==================== 音效 ====================
+            // ========== 音效 ==========
             let audioCtx = null;
-            function getAudioCtx() {
-                if (!audioCtx) {
-                    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
-                }
-                return audioCtx;
-            }
-            function playBeep(freq, duration, type = 'sine', vol = 0.15) {
-                const ctx = getAudioCtx();
-                if (!ctx) return;
+            function getAudioCtx() { if (!audioCtx) try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} return audioCtx; }
+            function playBeep(freq, duration, type='sine', vol=0.15) {
+                const ctx = getAudioCtx(); if(!ctx) return;
                 try {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.type = type;
-                    osc.frequency.value = freq;
+                    const osc = ctx.createOscillator(); const gain = ctx.createGain();
+                    osc.type = type; osc.frequency.value = freq;
                     gain.gain.setValueAtTime(vol, ctx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start(ctx.currentTime);
-                    osc.stop(ctx.currentTime + duration);
-                } catch (e) {}
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + duration);
+                } catch(e) {}
             }
-            function sfxCorrect() { playBeep(880, 0.12, 'sine', 0.18); playBeep(1100, 0.1, 'sine', 0.12); }
-            function sfxWrong() { playBeep(180, 0.25, 'triangle', 0.2); }
-            function sfxWin() {
-                playBeep(660, 0.12, 'sine', 0.18);
-                setTimeout(() => playBeep(880, 0.12, 'sine', 0.18), 120);
-                setTimeout(() => playBeep(1100, 0.18, 'sine', 0.22), 240);
-            }
-            function sfxTick() { playBeep(440, 0.06, 'square', 0.08); }
-            function sfxUnlock() { playBeep(1320, 0.08, 'sine', 0.2); }
+            function sfxCorrect() { playBeep(880,0.12); playBeep(1100,0.1); }
+            function sfxWrong() { playBeep(180,0.25,'triangle',0.2); }
+            function sfxWin() { playBeep(660,0.12); setTimeout(()=>playBeep(880,0.12),120); setTimeout(()=>playBeep(1100,0.18),240); }
+            function sfxTick() { playBeep(440,0.06,'square',0.08); }
+            function sfxUnlock() { playBeep(1320,0.08,'sine',0.2); }
 
-            // ==================== Toast ====================
-            function showToast(msg, duration = 2000) {
-                const el = document.createElement('div');
-                el.className = 'toast';
-                el.textContent = msg;
+            // ========== Toast ==========
+            function showToast(msg, duration=2000) {
+                const el = document.createElement('div'); el.className='toast'; el.textContent=msg;
                 toastContainer.appendChild(el);
-                setTimeout(() => { if (el.parentNode) el.remove(); }, duration + 500);
+                setTimeout(()=>{ if(el.parentNode) el.remove(); }, duration+500);
             }
 
-            // ==================== 本地存储 ====================
+            // ========== 持久化 ==========
             function saveProgress() {
                 try {
                     const data = {
                         totalScore,
                         completedLevels: Array.from(completedLevels),
                         currentLevelIndex,
+                        wrongAttempts,
+                        lockUntil: lockUntil ? lockUntil : null,
                     };
                     localStorage.setItem('hanzi_game_progress', JSON.stringify(data));
-                } catch (e) {}
+                } catch(e) {}
             }
             function loadProgress() {
                 try {
@@ -989,116 +793,161 @@
                         totalScore = data.totalScore || 0;
                         completedLevels = new Set(data.completedLevels || []);
                         currentLevelIndex = data.currentLevelIndex || 0;
+                        wrongAttempts = data.wrongAttempts || 0;
+                        lockUntil = data.lockUntil || null;
                         if (currentLevelIndex >= levelData.length) currentLevelIndex = levelData.length - 1;
                         if (currentLevelIndex < 0) currentLevelIndex = 0;
+                        // 如果锁定时间已过，自动清除
+                        if (lockUntil && Date.now() >= lockUntil) {
+                            lockUntil = null;
+                            // 注意：不清除错误次数，玩家已经等过了
+                        }
                     }
-                } catch (e) {}
+                } catch(e) {}
             }
 
-            // ==================== Canvas绘制 ====================
+            // ========== Canvas ==========
             function drawBigChar(character) {
                 const rect = bigCharWrapper.getBoundingClientRect();
                 const dpr = window.devicePixelRatio || 1;
-                const w = rect.width;
-                const h = rect.height;
-                if (w <= 0 || h <= 0) return;
-                bigCharCanvas.width = w * dpr;
-                bigCharCanvas.height = h * dpr;
-                bigCharCanvas.style.width = w + 'px';
-                bigCharCanvas.style.height = h + 'px';
-                ctx.setTransform(1, 0, 0, 1, 0, 0);
-                ctx.scale(dpr, dpr);
-
-                ctx.fillStyle = '#fffef9';
-                ctx.fillRect(0, 0, w, h);
-
-                const cx = w / 2;
-                const cy = h / 2;
-                const margin = w * 0.12;
-                ctx.strokeStyle = 'rgba(180,150,110,0.35)';
-                ctx.lineWidth = 1.2;
-                ctx.setLineDash([6, 4]);
-                ctx.beginPath();
-                ctx.moveTo(margin, cy);
-                ctx.lineTo(w - margin, cy);
-                ctx.moveTo(cx, margin);
-                ctx.lineTo(cx, h - margin);
-                ctx.stroke();
+                const w = rect.width, h = rect.height;
+                if (w<=0||h<=0) return;
+                bigCharCanvas.width = w*dpr; bigCharCanvas.height = h*dpr;
+                bigCharCanvas.style.width = w+'px'; bigCharCanvas.style.height = h+'px';
+                ctx.setTransform(1,0,0,1,0,0); ctx.scale(dpr,dpr);
+                ctx.fillStyle='#fffef9'; ctx.fillRect(0,0,w,h);
+                const cx=w/2, cy=h/2, margin=w*0.12;
+                ctx.strokeStyle='rgba(180,150,110,0.35)'; ctx.lineWidth=1.2;
+                ctx.setLineDash([6,4]);
+                ctx.beginPath(); ctx.moveTo(margin,cy); ctx.lineTo(w-margin,cy); ctx.moveTo(cx,margin); ctx.lineTo(cx,h-margin); ctx.stroke();
                 ctx.setLineDash([]);
-
-                ctx.strokeStyle = 'rgba(180,150,110,0.55)';
-                ctx.lineWidth = 2.5;
-                ctx.strokeRect(margin, margin, w - 2 * margin, h - 2 * margin);
-
-                const fontSize = Math.min(w, h) * 0.58;
-                ctx.fillStyle = '#3e2f1c';
-                ctx.font = `700 ${fontSize}px "STKaiti","KaiTi","楷体","Noto Serif SC","Songti SC","宋体",serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
+                ctx.strokeStyle='rgba(180,150,110,0.55)'; ctx.lineWidth=2.5; ctx.strokeRect(margin,margin,w-2*margin,h-2*margin);
+                const fontSize = Math.min(w,h)*0.58;
+                ctx.fillStyle='#3e2f1c'; ctx.font=`700 ${fontSize}px "STKaiti","KaiTi","楷体","Noto Serif SC","Songti SC","宋体",serif`;
+                ctx.textAlign='center'; ctx.textBaseline='middle';
                 ctx.fillText(character, cx, cy);
-                ctx.fillStyle = 'rgba(0,0,0,0.04)';
-                ctx.fillText(character, cx + 1.5, cy + 2);
-                ctx.fillStyle = '#3e2f1c';
-                ctx.fillText(character, cx, cy);
+                ctx.fillStyle='rgba(0,0,0,0.04)'; ctx.fillText(character, cx+1.5, cy+2);
+                ctx.fillStyle='#3e2f1c'; ctx.fillText(character, cx, cy);
             }
-            function redrawCanvas() {
-                const level = levelData[currentLevelIndex];
-                if (level) drawBigChar(level.character);
-            }
+            function redrawCanvas() { const level = levelData[currentLevelIndex]; if(level) drawBigChar(level.character); }
 
-            // 涟漪
-            function spawnRipple(x, y) {
-                const ripple = document.createElement('div');
-                ripple.className = 'ripple';
-                const size = Math.max(bigCharWrapper.offsetWidth, bigCharWrapper.offsetHeight) * 0.3;
-                ripple.style.width = size + 'px';
-                ripple.style.height = size + 'px';
-                ripple.style.left = (x - size / 2) + 'px';
-                ripple.style.top = (y - size / 2) + 'px';
+            function spawnRipple(x,y) {
+                const ripple = document.createElement('div'); ripple.className='ripple';
+                const size = Math.max(bigCharWrapper.offsetWidth, bigCharWrapper.offsetHeight)*0.3;
+                ripple.style.width=size+'px'; ripple.style.height=size+'px';
+                ripple.style.left=(x-size/2)+'px'; ripple.style.top=(y-size/2)+'px';
                 bigCharWrapper.appendChild(ripple);
-                ripple.addEventListener('animationend', () => ripple.remove());
+                ripple.addEventListener('animationend', ()=>ripple.remove());
             }
             bigCharWrapper.addEventListener('click', (e) => {
-                if (!isGameActive) return;
+                if (!isGameActive || isPaused || isLocked()) return;
                 const rect = bigCharWrapper.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                spawnRipple(x, y);
+                spawnRipple(e.clientX-rect.left, e.clientY-rect.top);
             });
 
-            // ==================== 游戏逻辑 ====================
+            // ========== 锁定逻辑 ==========
+            function isLocked() {
+                return lockUntil !== null && Date.now() < lockUntil;
+            }
+            function getPenaltySeconds(errors) {
+                if (errors <= 2) return 0;
+                if (errors === 3) return 2 * 60;
+                if (errors === 4) return 3 * 60;
+                if (errors === 5) return 4 * 60;
+                return 5 * 60; // 6次及以上
+            }
+            function applyLock() {
+                const penalty = getPenaltySeconds(wrongAttempts);
+                if (penalty <= 0) return;
+                lockUntil = Date.now() + penalty * 1000;
+                saveProgress();
+                showLockOverlay();
+                startLockTimer();
+            }
+            function showLockOverlay() {
+                if (!lockUntil) return;
+                lockOverlay.style.display = 'flex';
+                updateLockCountdownDisplay();
+                lockReason.textContent = `错误次数：${wrongAttempts} 次，关卡锁定中`;
+            }
+            function hideLockOverlay() {
+                lockOverlay.style.display = 'none';
+                if (lockTimerInterval) { clearInterval(lockTimerInterval); lockTimerInterval = null; }
+            }
+            function updateLockCountdownDisplay() {
+                if (!lockUntil) return;
+                const remaining = Math.max(0, Math.ceil((lockUntil - Date.now()) / 1000));
+                const mins = Math.floor(remaining / 60);
+                const secs = remaining % 60;
+                lockCountdown.textContent = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+                if (remaining <= 0) {
+                    handleLockExpired();
+                }
+            }
+            function startLockTimer() {
+                if (lockTimerInterval) clearInterval(lockTimerInterval);
+                lockTimerInterval = setInterval(() => {
+                    if (!lockUntil || Date.now() >= lockUntil) {
+                        handleLockExpired();
+                    } else {
+                        updateLockCountdownDisplay();
+                    }
+                }, 500);
+            }
+            function handleLockExpired() {
+                lockUntil = null;
+                if (lockTimerInterval) { clearInterval(lockTimerInterval); lockTimerInterval = null; }
+                hideLockOverlay();
+                saveProgress();
+                showToast('🔓 锁定时间结束，继续挑战吧！', 2000);
+                // 不重置错误次数，下次再错会再次触发并递增
+            }
+            function unlockViaAd() {
+                // 广告解锁：重置错误次数
+                wrongAttempts = 0;
+                lockUntil = null;
+                if (lockTimerInterval) { clearInterval(lockTimerInterval); lockTimerInterval = null; }
+                hideLockOverlay();
+                saveProgress();
+                showToast('📺 广告观看完毕，关卡已解锁！错误次数已重置', 2500);
+            }
+
+            // 广告解锁按钮
+            btnUnlockAd.addEventListener('click', () => {
+                if (!lockUntil) return;
+                showAd('📺 观看广告解锁关卡', '广告结束后将重置错误次数并解锁', () => {
+                    unlockViaAd();
+                });
+            });
+            btnWaitUnlock.addEventListener('click', () => {
+                // 只是关闭提示，实际上锁屏还在，用户需等待
+                showToast('请等待倒计时结束，或观看广告立即解锁', 2000);
+            });
+
+            // ========== 游戏逻辑 ==========
             function getCurrentLevel() { return levelData[currentLevelIndex]; }
-            function shuffleArray(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+            function shuffleArray(arr) { const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
             function buildCandidateList() {
                 const level = getCurrentLevel();
-                const all = [...level.hiddenWords, ...level.distractors];
-                return shuffleArray([...new Set(all)]);
+                return shuffleArray([...new Set([...level.hiddenWords, ...level.distractors])]);
             }
 
             function renderFoundCells() {
                 const level = getCurrentLevel();
-                const total = level.hiddenWords.length;
                 foundCells.innerHTML = '';
-                for (let i = 0; i < total; i++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'found-cell';
-                    foundCells.appendChild(cell);
+                for(let i=0; i<level.hiddenWords.length; i++) {
+                    const cell = document.createElement('div'); cell.className='found-cell'; foundCells.appendChild(cell);
                 }
                 updateFoundCellsDisplay();
-                progressMini.textContent = `0 / ${total}`;
+                progressMini.textContent = `0 / ${level.hiddenWords.length}`;
             }
             function updateFoundCellsDisplay() {
                 const level = getCurrentLevel();
                 const cells = foundCells.querySelectorAll('.found-cell');
                 const foundArr = Array.from(foundSet);
-                cells.forEach((cell, i) => {
-                    if (i < foundArr.length) {
-                        cell.textContent = foundArr[i];
-                        cell.classList.add('filled');
-                    } else {
-                        cell.textContent = '';
-                        cell.classList.remove('filled');
-                    }
+                cells.forEach((cell,i) => {
+                    if(i < foundArr.length) { cell.textContent = foundArr[i]; cell.classList.add('filled'); }
+                    else { cell.textContent = ''; cell.classList.remove('filled'); }
                 });
                 progressMini.textContent = `${foundArr.length} / ${level.hiddenWords.length}`;
             }
@@ -1109,16 +958,22 @@
                     chip.className = 'candidate-chip';
                     chip.textContent = word;
                     chip.dataset.word = word;
-                    if (foundSet.has(word)) chip.classList.add('found');
+                    if(foundSet.has(word)) chip.classList.add('found');
                     chip.addEventListener('click', () => handleChipClick(chip, word));
                     candidateChips.appendChild(chip);
                 });
             }
+
             function handleChipClick(chip, word) {
                 if (!isGameActive || isPaused) return;
+                if (isLocked()) {
+                    showToast('🔒 关卡已锁定，请等待或观看广告解锁', 2000);
+                    return;
+                }
                 const level = getCurrentLevel();
                 if (foundSet.has(word)) return;
                 if (level.hiddenWords.includes(word)) {
+                    // 正确
                     foundSet.add(word);
                     chip.classList.add('found');
                     updateFoundCellsDisplay();
@@ -1129,12 +984,22 @@
                     showToast('✅ 找到了「' + word + '」！+10分', 1500);
                     if (foundSet.size >= level.hiddenWords.length) handleWin();
                 } else {
+                    // 错误处理
                     chip.classList.add('wrong-flash');
                     sfxWrong();
                     timeLeft = Math.max(0, timeLeft - 3);
                     updateTimerDisplay();
-                    showToast('❌ 「' + word + '」不在这个字里哦，-3秒', 1800);
+                    wrongAttempts++;
+                    saveProgress();
+                    showToast(`❌ 「${word}」不在这个字里哦，-3秒 (错误${wrongAttempts}次)`, 2000);
                     setTimeout(() => chip.classList.remove('wrong-flash'), 500);
+
+                    // 检查是否需要锁定
+                    if (wrongAttempts >= 3 && !isLocked()) {
+                        applyLock();
+                    } else if (isLocked()) {
+                        // 已经锁定，不应该发生
+                    }
                 }
             }
 
@@ -1144,6 +1009,9 @@
                 totalScore += 100;
                 updateScoreDisplay();
                 completedLevels.add(currentLevelIndex);
+                // 通关后重置错误次数
+                wrongAttempts = 0;
+                lockUntil = null;
                 saveProgress();
                 sfxWin();
                 showResultModal(true);
@@ -1154,9 +1022,9 @@
                 showResultModal(false);
             }
             function updateTimerDisplay() {
-                const mins = Math.floor(timeLeft / 60);
-                const secs = timeLeft % 60;
-                timerDisplay.textContent = `⏱ ${mins}:${secs.toString().padStart(2, '0')}`;
+                const mins = Math.floor(timeLeft/60);
+                const secs = timeLeft%60;
+                timerDisplay.textContent = `⏱ ${mins}:${secs.toString().padStart(2,'0')}`;
                 timerDisplay.classList.toggle('warning', timeLeft <= 15);
             }
             function updateScoreDisplay() { scoreDisplay.textContent = totalScore; }
@@ -1164,7 +1032,7 @@
                 clearInterval(timerInterval);
                 updateTimerDisplay();
                 timerInterval = setInterval(() => {
-                    if (isPaused) return;
+                    if (isPaused || isLocked()) return;
                     timeLeft--;
                     updateTimerDisplay();
                     if (timeLeft <= 15 && timeLeft > 0) sfxTick();
@@ -1179,6 +1047,11 @@
                 isPaused = false;
                 hintUsedCount = 0;
                 reviveUsed = false;
+                // 注意：错误次数和锁定状态在加载关卡时可能需要保留或重置？
+                // 根据需求，切换关卡时应该重置错误次数和锁定，因为这是新的一关。
+                wrongAttempts = 0;
+                lockUntil = null;
+                hideLockOverlay();
                 updateTimerDisplay();
                 timerDisplay.classList.remove('warning');
                 updateScoreDisplay();
@@ -1186,25 +1059,30 @@
             }
             function loadLevel(index) {
                 if (index < 0 || index >= levelData.length) return;
+                // 在加载新关卡前，保存旧关卡的错误状态可能不必要，直接重置
                 currentLevelIndex = index;
                 resetGameState();
                 const level = getCurrentLevel();
                 levelBadge.textContent = `第${level.id}关`;
-                levelTitle.textContent = '★'.repeat(level.difficulty) + '☆'.repeat(5 - level.difficulty);
+                levelTitle.textContent = '★'.repeat(level.difficulty) + '☆'.repeat(5-level.difficulty);
                 renderFoundCells();
                 renderCandidateChips(buildCandidateList());
                 redrawCanvas();
                 startTimer();
                 updateScoreDisplay();
-                btnHint.disabled = false;
                 saveProgress();
                 resultOverlay.style.display = 'none';
                 levelSelectOverlay.style.display = 'none';
                 adOverlay.style.display = 'none';
+                // 检查是否从进度恢复时仍处于锁定状态
+                if (isLocked()) {
+                    showLockOverlay();
+                    startLockTimer();
+                }
             }
             function reloadCurrentLevel() { loadLevel(currentLevelIndex); }
 
-            // ==================== 广告系统 ====================
+            // ========== 广告系统 (模拟) ==========
             function showAd(title, subtitle, callback) {
                 if (adCountdownTimer) clearInterval(adCountdownTimer);
                 adCallback = callback;
@@ -1219,7 +1097,7 @@
                 adCountdownTimer = setInterval(() => {
                     count--;
                     adCountdown.textContent = count;
-                    adProgressFill.style.width = ((5 - count) / 5 * 100) + '%';
+                    adProgressFill.style.width = ((5-count)/5*100)+'%';
                     if (count <= 0) {
                         clearInterval(adCountdownTimer);
                         adCountdownTimer = null;
@@ -1242,7 +1120,10 @@
             });
 
             btnHint.addEventListener('click', () => {
-                if (!isGameActive || isPaused) return;
+                if (!isGameActive || isPaused || isLocked()) {
+                    if (isLocked()) showToast('🔒 关卡已锁定，无法使用提示', 1500);
+                    return;
+                }
                 const level = getCurrentLevel();
                 const unfound = level.hiddenWords.filter(w => !foundSet.has(w));
                 if (unfound.length === 0) { showToast('所有隐藏字都已找到！', 1500); return; }
@@ -1254,7 +1135,7 @@
                         foundSet.add(pick);
                         updateFoundCellsDisplay();
                         const chips = candidateChips.querySelectorAll('.candidate-chip');
-                        chips.forEach(ch => { if (ch.dataset.word === pick) ch.classList.add('found'); });
+                        chips.forEach(ch => { if(ch.dataset.word === pick) ch.classList.add('found'); });
                         hintUsedCount++;
                         sfxUnlock();
                         showToast('💡 已解锁「' + pick + '」', 1800);
@@ -1267,6 +1148,7 @@
                 });
             });
 
+            // ========== 结果弹窗 ==========
             function showResultModal(isWin) {
                 resultOverlay.style.display = 'flex';
                 const level = getCurrentLevel();
@@ -1332,7 +1214,7 @@
                     cell.className = 'level-cell';
                     if (completedLevels.has(idx)) cell.classList.add('completed');
                     if (idx === currentLevelIndex && !completedLevels.has(idx)) cell.classList.add('current');
-                    const isUnlocked = idx === 0 || completedLevels.has(idx - 1) || completedLevels.has(idx);
+                    const isUnlocked = idx === 0 || completedLevels.has(idx-1) || completedLevels.has(idx);
                     if (!isUnlocked && idx > 0) cell.classList.add('locked');
                     cell.innerHTML = `<span class="level-num">${lv.id}</span><span class="level-char">${lv.character}</span><span class="level-stars">${'★'.repeat(lv.difficulty)}</span>`;
                     cell.addEventListener('click', () => {
@@ -1343,18 +1225,19 @@
                     levelGrid.appendChild(cell);
                 });
             }
-            btnLevels.addEventListener('click', () => { if (isGameActive && !isPaused) isPaused = true; openLevelSelect(); });
-            btnCloseLevelSelect.addEventListener('click', () => { levelSelectOverlay.style.display = 'none'; if (isPaused && isGameActive) isPaused = false; });
-            levelSelectOverlay.addEventListener('click', (e) => { if (e.target === levelSelectOverlay) { levelSelectOverlay.style.display = 'none'; if (isPaused && isGameActive) isPaused = false; } });
+            btnLevels.addEventListener('click', () => { if (isGameActive && !isPaused && !isLocked()) isPaused = true; openLevelSelect(); });
+            btnCloseLevelSelect.addEventListener('click', () => { levelSelectOverlay.style.display = 'none'; if (isPaused && isGameActive && !isLocked()) isPaused = false; });
+            levelSelectOverlay.addEventListener('click', (e) => { if (e.target === levelSelectOverlay) { levelSelectOverlay.style.display = 'none'; if (isPaused && isGameActive && !isLocked()) isPaused = false; } });
             resultOverlay.addEventListener('click', (e) => { if (e.target === resultOverlay) resultOverlay.style.display = 'none'; });
 
             let resizeDebounce = null;
-            window.addEventListener('resize', () => { if (resizeDebounce) clearTimeout(resizeDebounce); resizeDebounce = setTimeout(redrawCanvas, 250); });
+            window.addEventListener('resize', () => { if(resizeDebounce) clearTimeout(resizeDebounce); resizeDebounce = setTimeout(redrawCanvas, 250); });
             window.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     if (adOverlay.style.display === 'flex' && btnCloseAd.classList.contains('visible')) closeAd();
-                    else if (levelSelectOverlay.style.display === 'flex') { levelSelectOverlay.style.display = 'none'; if (isPaused && isGameActive) isPaused = false; }
+                    else if (levelSelectOverlay.style.display === 'flex') { levelSelectOverlay.style.display = 'none'; if (isPaused && isGameActive && !isLocked()) isPaused = false; }
                     else if (resultOverlay.style.display === 'flex') resultOverlay.style.display = 'none';
+                    else if (lockOverlay.style.display === 'flex') { /* 不允许关闭锁屏 */ }
                 }
             });
 
@@ -1363,11 +1246,143 @@
                 if (currentLevelIndex >= levelData.length) currentLevelIndex = 0;
                 if (currentLevelIndex < 0) currentLevelIndex = 0;
                 updateScoreDisplay();
+                // 注意：loadLevel 会重置 wrongAttempts 和 lockUntil，但我们需要从进度中恢复它们吗？
+                // 我们希望在加载关卡时，如果该关卡之前被锁定且未过期，则恢复锁定。
+                // 所以 loadLevel 不应该重置错误次数，除非是新关卡。
+                // 调整：resetGameState 会重置，但 loadLevel 调用 resetGameState。
+                // 解决：在 loadLevel 中，先检查是否要从进度恢复当前关卡的锁定状态。
+                // 简单处理：loadLevel 之前，保存旧状态；但第一次加载时，需要根据存储的 wrongAttempts 和 lockUntil 设置。
+                // 我们在 loadLevel 末尾会检查 isLocked()，如果锁定则显示遮罩。
+                // 但 resetGameState 清除了 wrongAttempts 和 lockUntil，所以需要修改：loadLevel 中不要重置这两个值，而是从外部传入。
+                // 重构：将 wrongAttempts 和 lockUntil 视为关卡相关状态，切换关卡时重置，但同一关卡重试或从进度加载时保留。
+                // 由于 loadProgress 已经加载了 wrongAttempts 和 lockUntil，而 loadLevel 目前重置了它们。
+                // 我们需要区分：是否是新关卡加载。最简单：loadLevel 接受一个参数指示是否保留错误状态。
+                // 为简化，我们修改 loadLevel：在调用前保存当前关卡的错误状态，如果要加载同一关卡（重试）则保留，否则重置。
+                // 但是 init 调用 loadLevel 时，我们希望恢复之前的锁定状态。
+                // 所以，我们将 loadLevel 改为默认不重置 wrongAttempts/lockUntil，除非显式重置。
+                // 于是，移除 resetGameState 中的 wrongAttempts=0 和 lockUntil=null，并在切换关卡时手动重置。
+                // 实现：在 loadLevel 内部，判断是否为新关卡（index !== currentLevelIndex），如果是新关卡，重置错误；否则保留。
+                // 这样可以处理重试和初始化。
+            }
+
+            // 重写 loadLevel 以智能处理错误状态
+            function loadLevel(index, forceResetErrors = false) {
+                if (index < 0 || index >= levelData.length) return;
+                const isNewLevel = (index !== currentLevelIndex);
+                if (isNewLevel || forceResetErrors) {
+                    wrongAttempts = 0;
+                    lockUntil = null;
+                    hideLockOverlay();
+                }
+                currentLevelIndex = index;
+                // 其余重置
+                clearInterval(timerInterval);
+                foundSet.clear();
+                timeLeft = TOTAL_TIME;
+                isGameActive = true;
+                isPaused = false;
+                hintUsedCount = 0;
+                reviveUsed = false;
+                updateTimerDisplay();
+                timerDisplay.classList.remove('warning');
+                updateScoreDisplay();
+                btnHint.disabled = false;
+                const level = getCurrentLevel();
+                levelBadge.textContent = `第${level.id}关`;
+                levelTitle.textContent = '★'.repeat(level.difficulty) + '☆'.repeat(5-level.difficulty);
+                renderFoundCells();
+                renderCandidateChips(buildCandidateList());
+                redrawCanvas();
+                startTimer();
+                updateScoreDisplay();
+                saveProgress();
+                resultOverlay.style.display = 'none';
+                levelSelectOverlay.style.display = 'none';
+                adOverlay.style.display = 'none';
+                if (isLocked()) {
+                    showLockOverlay();
+                    startLockTimer();
+                }
+            }
+
+            // 重新绑定重试按钮调用 loadLevel(currentLevelIndex, true) 强制重置错误
+            // 注意：showResultModal 中的重试按钮调用了 reloadCurrentLevel，我们修改 reloadCurrentLevel 实现强制重置
+            function reloadCurrentLevel(resetErrors = true) {
+                loadLevel(currentLevelIndex, resetErrors);
+            }
+
+            // 更新 showResultModal 中重试按钮的事件为 reloadCurrentLevel(true)
+            // 在原来的 setTimeout 中修改绑定
+            function showResultModal(isWin) {
+                resultOverlay.style.display = 'flex';
+                const level = getCurrentLevel();
+                if (isWin) {
+                    resultModal.innerHTML = `
+                        <div class="result-icon">🎉</div>
+                        <div class="result-title" style="color:#4caf50;">恭喜通关！</div>
+                        <div class="result-subtitle">你成功找出了「${level.character}」中所有的隐藏字</div>
+                        <div class="result-score">🪙 通关奖励 +100分 | 总分：${totalScore}</div>
+                        <div class="result-buttons">
+                            ${currentLevelIndex < levelData.length - 1 ? '<button class="btn-result btn-next" id="btnNextLevel">▶ 下一关</button>' : '<button class="btn-result btn-next" style="background:#gold;color:#3e2f1c;">🏆 全部通关！</button>'}
+                            <button class="btn-result btn-retry" id="btnRetryLevel">🔄 重玩本关</button>
+                            <button class="btn-result btn-quit" id="btnQuitResult">📂 关卡选择</button>
+                        </div>`;
+                } else {
+                    resultModal.innerHTML = `
+                        <div class="result-icon">⏰</div>
+                        <div class="result-title" style="color:#e74c3c;">时间到！</div>
+                        <div class="result-subtitle">「${level.character}」还剩 ${level.hiddenWords.length - foundSet.size} 个隐藏字未找到</div>
+                        <div class="result-score">已找到：${foundSet.size} / ${level.hiddenWords.length}</div>
+                        <div class="result-buttons">
+                            ${!reviveUsed ? '<button class="btn-result btn-ad" id="btnRevive">📺 看广告加时30秒</button>' : '<span style="color:#999;font-size:0.85rem;">本关已使用过复活</span>'}
+                            <button class="btn-result btn-retry" id="btnRetryLevel">🔄 重新挑战</button>
+                            <button class="btn-result btn-quit" id="btnQuitResult">📂 关卡选择</button>
+                        </div>`;
+                }
+                setTimeout(() => {
+                    const btnNext = $('#btnNextLevel');
+                    const btnRetry = $('#btnRetryLevel');
+                    const btnQuit = $('#btnQuitResult');
+                    const btnRevive = $('#btnRevive');
+                    if (btnNext) btnNext.addEventListener('click', () => {
+                        resultOverlay.style.display = 'none';
+                        if (currentLevelIndex < levelData.length - 1) loadLevel(currentLevelIndex + 1, true);
+                        else { showToast('🏆 恭喜！你已通关全部关卡！', 3000); loadLevel(0, true); }
+                    });
+                    if (btnRetry) btnRetry.addEventListener('click', () => {
+                        resultOverlay.style.display = 'none';
+                        reloadCurrentLevel(true); // 强制重置错误
+                    });
+                    if (btnQuit) btnQuit.addEventListener('click', () => { resultOverlay.style.display = 'none'; openLevelSelect(); });
+                    if (btnRevive) btnRevive.addEventListener('click', () => {
+                        resultOverlay.style.display = 'none';
+                        showAd('📺 观看广告获得加时', '广告结束后增加30秒继续挑战', () => {
+                            timeLeft += BONUS_TIME;
+                            reviveUsed = true;
+                            isGameActive = true;
+                            isPaused = false;
+                            updateTimerDisplay();
+                            timerDisplay.classList.remove('warning');
+                            startTimer();
+                            showToast('⏱ +30秒！继续加油！', 2000);
+                        });
+                    });
+                }, 100);
+            }
+
+            // 初始化
+            function init() {
+                loadProgress();
+                if (currentLevelIndex >= levelData.length) currentLevelIndex = 0;
+                if (currentLevelIndex < 0) currentLevelIndex = 0;
+                updateScoreDisplay();
+                // 首次加载，如果存储的 wrongAttempts/lockUntil 存在且属于当前关卡，则保留（loadLevel 不会重置因为 isNewLevel 判断）
+                // 但 init 时 currentLevelIndex 可能等于存储的 index，所以 loadLevel 内部会判断 isNewLevel (false) 从而保留错误状态。
                 loadLevel(currentLevelIndex);
                 setTimeout(redrawCanvas, 200);
             }
             init();
-            console.log('🀄 汉字拆字大师 - 游戏已就绪');
+            console.log('🀄 汉字拆字大师 - 游戏已就绪 (含错误惩罚锁)');
         })();
     </script>
 </body>
