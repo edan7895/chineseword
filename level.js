@@ -1,8 +1,3 @@
-// ==========================================
-// 漢字拆字大師 - Part 1 完整代碼（第1 - 100關）
-// 難度梯度：入門（難度1）到基礎（難度2），去除了“一二三”等死板重復答案
-// ==========================================
-
 const levelData = [
     // ========== 難度1：入門階段（1-40關：獨體字與極簡結構，找出2-4個隱藏字） ==========
     { id: 1, character: '大', hiddenWords: ['人', '大'], distractors: ['天', '太', '犬', '木', '个'], difficulty: 1 },
@@ -45,7 +40,4 @@ const levelData = [
     { id: 38, character: '召', hiddenWords: ['刀', '口', '召'], distractors: ['招', '沼', '超', '紹', '迢'], difficulty: 1 },
     { id: 39, character: '只', hiddenWords: ['口', '八', '只'], distractors: ['识', '炽', '织', '职', '积'], difficulty: 1 },
     { id: 40, character: '兄', hiddenWords: ['口', '儿', '兄'], distractors: ['兑', '克', '兢', '況', '祝'], difficulty: 1 }
-
-
-
 ];
