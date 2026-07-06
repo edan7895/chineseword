@@ -906,7 +906,7 @@ const levelData = [
     { id: 867, character: '鱺', hiddenWords: ['田', '口', '鱼', '丽', '丽', '鱺'], distractors: ['驪', '鸝', '鱺', '麗', '酈', '邐', '鯉', '鯽', '鯨', '鯊', '鮑', '鰻'], difficulty: 5 },
     { id: 868, character: '鸕', hiddenWords: ['鸟', '卢', '卢', '鸕'], distractors: ['鸕', '顱', '鱸', '壚', '瀘', '獹', '鸕', '鸕', '鸕', '鸕', '鸕', '鸕'], difficulty: 5 },
     { id: 869, character: '顱', hiddenWords: ['卢', '卢', '页', '口', '贝', '顱'], distractors: ['鸕', '顱', '鱸', '壚', '瀘', '獹', '頂', '項', '順', '須', '頑', '顧'], difficulty: 5 },
-    { id: 72, character: '鱸', hiddenWords: ['田', '口', '鱼', '卢', '卢', '鱸'], distractors: ['鸕', '顱', '鱸', '壚', '瀘', '獹', '鯉', '鯽', '鯨', '鯊', '鮑', '鰻'], difficulty: 5 },
+    { id: 870, character: '鱸', hiddenWords: ['田', '口', '鱼', '卢', '卢', '鱸'], distractors: ['鸕', '顱', '鱸', '壚', '瀘', '獹', '鯉', '鯽', '鯨', '鯊', '鮑', '鰻'], difficulty: 5 },
     { id: 871, character: '鸛', hiddenWords: ['草', '口', '口', '隹', '鸟', '鸛'], distractors: ['觀', '罐', '顴', '鸛', '歡', '權', '勸', '灌', '懽', '鸛', '鸛', '鸛'], difficulty: 5 },
     { id: 872, character: '觀', hiddenWords: ['草', '口', '口', '隹', '见', '儿', '觀'], distractors: ['鸛', '罐', '顴', '觀', '歡', '權', '勸', '灌', '懽', '規', '視', '覓'], difficulty: 5 },
     { id: 873, character: '罐', hiddenWords: ['缶', '草', '口', '口', '隹', '罐'], distractors: ['鸛', '觀', '顴', '罐', '歡', '權', '勸', '灌', '懽', '缸', '缺', '罈'], difficulty: 5 },
