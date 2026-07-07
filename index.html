@@ -14,196 +14,447 @@
             --gold-light: #f0c75e;
             --text: #3e2f1c;
             --text-light: #6b5d4f;
-            --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
-            --shadow-md: 0 6px 20px rgba(0,0,0,0.10);
-            --shadow-lg: 0 12px 36px rgba(0,0,0,0.14);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.10);
+            --shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.14);
             --radius-sm: 10px;
             --radius-md: 16px;
             --radius-lg: 22px;
-            --font-serif: 'STKaiti','KaiTi','楷体','Noto Serif SC','Songti SC','宋体',serif;
-            --font-sans: 'PingFang SC','Hiragino Sans GB','Microsoft YaHei','微软雅黑',sans-serif;
-            --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+            --font-serif: 'STKaiti', 'KaiTi', '楷体', 'Noto Serif SC', 'Songti SC', '宋体', serif;
+            --font-sans: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', sans-serif;
+            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             --cell-size: 48px;
             --cell-size-mobile: 40px;
         }
-        * { margin:0; padding:0; box-sizing:border-box; }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: var(--font-sans);
             background: linear-gradient(160deg, #fdf6ee 0%, #f7efe0 30%, #faf3e6 60%, #fdf8f2 100%);
-            background-attachment: fixed; min-height: 100vh; min-height: 100dvh; color: var(--text);
-            display: flex; align-items: center; justify-content: center; padding: 12px;
-            -webkit-tap-highlight-color: transparent; user-select: none; touch-action: manipulation;
+            background-attachment: fixed;
+            min-height: 100vh;
+            min-height: 100dvh;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            touch-action: manipulation;
         }
+
         .app-container {
-            width: 100%; max-width: 820px; background: var(--card-bg); border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-lg); overflow: hidden; display: flex; flex-direction: column;
-            border: 1px solid rgba(180,150,110,0.15);
+            width: 100%;
+            max-width: 820px;
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            border: 1px solid rgba(180, 150, 110, 0.15);
         }
+
         .top-bar {
-            display: flex; align-items: center; justify-content: space-between; padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
             background: linear-gradient(180deg, #fffef9 0%, #fdf8f0 100%);
-            border-bottom: 1px solid rgba(180,150,110,0.18); flex-wrap: wrap; gap: 10px; z-index: 5;
+            border-bottom: 1px solid rgba(180, 150, 110, 0.18);
+            flex-wrap: wrap;
+            gap: 10px;
+            position: relative;
+            z-index: 5;
         }
-        .level-info { display: flex; align-items: center; gap: 8px; font-weight: 700; }
-        .level-badge { background: var(--primary); color:#fff; border-radius: 20px; padding: 4px 12px; font-size: 0.85rem; font-weight: 700; }
-        .timer {
-            font-weight: 700; background: #fef9f0; border-radius: 20px; padding: 5px 14px;
-            border: 1.5px solid rgba(180,150,110,0.25); min-width: 80px; text-align: center;
+        .top-bar .level-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text);
         }
-        .timer.warning { color:#e74c3c; border-color:#e74c3c; background:#fff5f5; animation: pulse-warning 0.7s infinite; }
-        @keyframes pulse-warning { 0%,100%{transform:scale(1);} 50%{transform:scale(1.06);} }
-        .score-display {
-            font-weight: 700; color: var(--gold); background: #fffef7; border-radius: 20px;
-            padding: 5px 13px; border: 1.5px solid rgba(212,160,23,0.3);
+        .top-bar .level-badge {
+            background: var(--primary);
+            color: #fff;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        .top-bar .timer {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: var(--text);
+            background: #fef9f0;
+            border-radius: 20px;
+            padding: 5px 14px;
+            border: 1.5px solid rgba(180, 150, 110, 0.25);
+            min-width: 80px;
+            justify-content: center;
+            transition: all var(--transition);
+        }
+        .top-bar .timer.warning {
+            color: #e74c3c;
+            border-color: #e74c3c;
+            animation: pulse-warning 0.7s ease-in-out infinite;
+            background: #fff5f5;
+        }
+        @keyframes pulse-warning {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+        }
+        .top-bar .score-display {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--gold);
+            background: #fffef7;
+            border-radius: 20px;
+            padding: 5px 13px;
+            border: 1.5px solid rgba(212, 160, 23, 0.3);
+            white-space: nowrap;
+        }
+        .top-bar .score-display .coin-icon {
+            font-size: 1.2rem;
         }
         .lives-display {
-            display: flex; align-items: center; gap: 4px; font-weight: 700; font-size: 0.95rem;
-            color: #e74c3c; background: #fff5f5; border-radius: 20px; padding: 5px 13px;
-            border: 1.5px solid rgba(231,76,60,0.3);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #e74c3c;
+            background: #fff5f5;
+            border-radius: 20px;
+            padding: 5px 13px;
+            border: 1.5px solid rgba(231, 76, 60, 0.3);
         }
-        .lives-display .heart { font-size: 1.1rem; }
+        .lives-display .heart {
+            font-size: 1.1rem;
+        }
         .recovery-timer { margin-left: 6px; font-size: 0.8rem; color: #e67e22; }
 
         .game-main {
-            display: flex; flex-wrap: wrap; gap: 16px; padding: 18px; align-items: flex-start; justify-content: center;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 18px;
+            align-items: flex-start;
+            justify-content: center;
         }
-        .big-char-zone { flex: 1 1 240px; min-width: 200px; max-width: 340px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-        .big-char-wrapper {
-            position: relative; width: 100%; aspect-ratio: 1/1; max-width: 320px; max-height: 320px;
-            cursor: pointer; border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-md);
-            background: #fffef9; border: 2px solid rgba(180,150,110,0.2);
-        }
-        .big-char-wrapper canvas { display: block; width: 100%; height: 100%; border-radius: var(--radius-md); }
-        .big-char-label { font-size: 0.85rem; color: var(--text-light); }
-        .ripple {
-            position: absolute; border-radius: 50%; background: rgba(212,160,23,0.45);
-            transform: scale(0); animation: ripple-anim 0.7s ease-out forwards; pointer-events: none; z-index: 2;
-        }
-        @keyframes ripple-anim { to { transform: scale(4); opacity: 0; } }
 
-        .right-panel { flex: 1 1 280px; min-width: 240px; display: flex; flex-direction: column; gap: 16px; }
-        .found-grid-section {
-            background: #fefcf7; border-radius: var(--radius-md); padding: 14px 16px;
-            border: 1.5px solid rgba(180,150,110,0.2); box-shadow: var(--shadow-sm);
+        .big-char-zone {
+            flex: 1 1 240px;
+            min-width: 200px;
+            max-width: 340px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
         }
-        .found-grid-title { font-size: 0.85rem; font-weight: 700; color: var(--text-light); text-align: center; margin-bottom: 10px; }
-        .found-cells { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .big-char-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            max-width: 320px;
+            max-height: 320px;
+            cursor: pointer;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition);
+            background: #fffef9;
+            border: 2px solid rgba(180, 150, 110, 0.2);
+        }
+        .big-char-wrapper:active {
+            transform: scale(0.97);
+            box-shadow: var(--shadow-sm);
+        }
+        .big-char-wrapper canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: var(--radius-md);
+        }
+        .big-char-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            letter-spacing: 2px;
+            font-family: var(--font-serif);
+        }
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(212, 160, 23, 0.45);
+            transform: scale(0);
+            animation: ripple-anim 0.7s ease-out forwards;
+            pointer-events: none;
+            z-index: 2;
+        }
+        @keyframes ripple-anim {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        .right-panel {
+            flex: 1 1 280px;
+            min-width: 240px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .found-grid-section {
+            background: #fefcf7;
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            border: 1.5px solid rgba(180, 150, 110, 0.2);
+            box-shadow: var(--shadow-sm);
+        }
+        .found-grid-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+        .found-cells {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
         .found-cell {
-            width: var(--cell-size); height: var(--cell-size); border: 2px dashed rgba(180,150,110,0.35);
-            border-radius: 8px; display: flex; align-items: center; justify-content: center;
-            font-size: 1.3rem; font-family: var(--font-serif); font-weight: 700; color: #c9b896; background: #fefefb;
-            transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+            width: var(--cell-size);
+            height: var(--cell-size);
+            border: 2px dashed rgba(180, 150, 110, 0.35);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-family: var(--font-serif);
+            font-weight: 700;
+            color: #c9b896;
+            background: #fefefb;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            cursor: default;
         }
         .found-cell.filled {
-            border-color: var(--gold); border-style: solid; background: #fffef5; color: var(--text);
-            animation: cell-pop 0.45s cubic-bezier(0.175,0.885,0.32,1.275);
+            border-color: var(--gold);
+            border-style: solid;
+            background: #fffef5;
+            color: var(--text);
+            animation: cell-pop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 3px 12px rgba(212, 160, 23, 0.25);
         }
-        @keyframes cell-pop { 0%{transform:scale(0.3) rotateY(90deg);opacity:0;} 50%{transform:scale(1.15);} }
-        .progress-mini { text-align: center; font-size: 0.8rem; color: var(--text-light); margin-top: 8px; }
+        @keyframes cell-pop {
+            0% { transform: scale(0.3) rotateY(90deg); opacity: 0; }
+            50% { transform: scale(1.15) rotateY(0deg); opacity: 1; }
+            100% { transform: scale(1) rotateY(0deg); }
+        }
+        .progress-mini {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 8px;
+            font-weight: 600;
+        }
 
         .candidate-section {
-            background: #fefcf7; border-radius: var(--radius-md); padding: 14px 16px;
-            border: 1.5px solid rgba(180,150,110,0.2); box-shadow: var(--shadow-sm);
+            background: #fefcf7;
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            border: 1.5px solid rgba(180, 150, 110, 0.2);
+            box-shadow: var(--shadow-sm);
         }
-        .candidate-title { font-size: 0.85rem; font-weight: 700; color: var(--text-light); text-align: center; margin-bottom: 10px; }
-        .candidate-chips { display: flex; flex-wrap: wrap; gap: 9px; justify-content: center; }
+        .candidate-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+        .candidate-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+            justify-content: center;
+        }
         .candidate-chip {
-            display: inline-flex; align-items: center; justify-content: center; min-width: 46px; height: 46px;
-            padding: 6px 14px; border-radius: 23px; font-size: 1.1rem; font-family: var(--font-serif);
-            font-weight: 700; cursor: pointer; transition: all var(--transition); background: #fffef9;
-            border: 2px solid rgba(180,150,110,0.3); color: var(--text);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 46px;
+            height: 46px;
+            padding: 6px 14px;
+            border-radius: 23px;
+            font-size: 1.1rem;
+            font-family: var(--font-serif);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition);
+            background: #fffef9;
+            border: 2px solid rgba(180, 150, 110, 0.3);
+            color: var(--text);
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
-        .candidate-chip:hover { border-color: var(--gold); background: #fffef3; box-shadow: 0 4px 14px rgba(212,160,23,0.2); transform: translateY(-2px); }
-        .candidate-chip:active { transform: scale(0.93); }
+        .candidate-chip:hover {
+            border-color: var(--gold);
+            background: #fffef3;
+            box-shadow: 0 4px 14px rgba(212, 160, 23, 0.2);
+            transform: translateY(-2px);
+        }
+        .candidate-chip:active {
+            transform: scale(0.93);
+            transition: 0.1s;
+        }
         .candidate-chip.found {
-            background: #e8f5e9; border-color: #4caf50; color: #2e7d32; pointer-events: none; opacity: 0.7;
-            text-decoration: line-through; text-decoration-thickness: 2px; text-decoration-color: #4caf50;
+            background: #e8f5e9;
+            border-color: #4caf50;
+            color: #2e7d32;
+            pointer-events: none;
+            opacity: 0.7;
+            text-decoration: line-through;
+            text-decoration-thickness: 2px;
+            text-decoration-color: #4caf50;
         }
-        .candidate-chip.wrong-flash { animation: shake 0.5s ease; background: #fff0f0; border-color: #e74c3c; color: #c0392b; }
+        .candidate-chip.wrong-flash {
+            animation: shake 0.5s ease;
+            background: #fff0f0;
+            border-color: #e74c3c;
+            color: #c0392b;
+        }
         @keyframes shake {
-            0%,100%{transform:translateX(0);} 20%{transform:translateX(-6px);} 40%{transform:translateX(6px);}
-            60%{transform:translateX(-5px);} 80%{transform:translateX(4px);}
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-6px); }
+            40% { transform: translateX(6px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(4px); }
         }
 
         .bottom-bar {
-            display: flex; align-items: center; justify-content: center; gap: 12px; padding: 14px 18px;
-            border-top: 1px solid rgba(180,150,110,0.18); flex-wrap: wrap; background: #fffef9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 14px 18px;
+            border-top: 1px solid rgba(180, 150, 110, 0.18);
+            flex-wrap: wrap;
+            background: #fffef9;
         }
         .btn {
-            display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; border-radius: 25px;
-            font-weight: 700; font-size: 0.9rem; cursor: pointer; border: none; transition: all var(--transition);
-            font-family: var(--font-sans); white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            transition: all var(--transition);
+            letter-spacing: 0.5px;
+            font-family: var(--font-sans);
+            white-space: nowrap;
+            -webkit-tap-highlight-color: transparent;
         }
-        .btn-hint { background: #fff8e1; color: #b8860b; border: 2px solid rgba(212,160,23,0.4); }
+        .btn-hint {
+            background: #fff8e1;
+            color: #b8860b;
+            border: 2px solid rgba(212, 160, 23, 0.4);
+        }
         .btn-hint:hover { background: #fff3cd; border-color: var(--gold); }
-        .btn-levels { background: #f5f0e8; color: var(--text); border: 2px solid rgba(180,150,110,0.3); }
+        .btn-levels {
+            background: #f5f0e8;
+            color: var(--text);
+            border: 2px solid rgba(180, 150, 110, 0.3);
+        }
         .btn-levels:hover { background: #ede5d8; }
         .btn-revive {
-            background: linear-gradient(135deg, #ff6b6b, #e74c3c); color: #fff;
-            box-shadow: 0 4px 14px rgba(231,76,60,0.35);
+            background: linear-gradient(135deg, #ff6b6b, #e74c3c);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(231, 76, 60, 0.35);
         }
         .btn-revive:hover { background: #c0392b; }
+        .btn-daily { background: #e8f5e9; color: #2e7d32; border: 2px solid #4caf50; }
+        .btn-daily:hover { background: #c8e6c9; }
         .btn:disabled { opacity: 0.45; pointer-events: none; cursor: not-allowed; }
 
         .ad-overlay {
-            position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.82); z-index:999;
-            display:flex; align-items:center; justify-content:center; animation: fade-in 0.3s ease;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.82); z-index: 999;
+            display: flex; align-items: center; justify-content: center; animation: fade-in 0.3s ease;
         }
         .ad-modal {
-            background:#fffef9; border-radius:var(--radius-lg); padding:28px 24px; text-align:center;
-            max-width:400px; width:90%; box-shadow:0 20px 50px rgba(0,0,0,0.4);
+            background: #fffef9; border-radius: var(--radius-lg); padding: 28px 24px; text-align: center;
+            max-width: 400px; width: 90%; box-shadow: 0 20px 50px rgba(0,0,0,0.4);
             animation: pop-in 0.35s cubic-bezier(0.175,0.885,0.32,1.275);
         }
-        .ad-modal .ad-icon { font-size:3rem; margin-bottom:8px; }
-        .ad-modal .ad-title { font-weight:700; font-size:1.2rem; color:var(--text); margin-bottom:6px; }
-        .ad-modal .ad-subtitle { font-size:0.85rem; color:var(--text-light); margin-bottom:16px; }
-        .ad-modal .ad-countdown { font-size:2.8rem; font-weight:900; color:var(--primary); margin:10px 0; }
-        .ad-modal .ad-progress-bar { width:100%; height:6px; background:#e8e0d5; border-radius:3px; overflow:hidden; margin:10px 0 16px; }
-        .ad-modal .ad-progress-fill { height:100%; background:linear-gradient(90deg,#e74c3c,#f39c12); border-radius:3px; transition:width 0.95s linear; }
+        .ad-modal .ad-icon { font-size: 3rem; margin-bottom: 8px; }
+        .ad-modal .ad-title { font-weight: 700; font-size: 1.2rem; color: var(--text); margin-bottom: 6px; }
+        .ad-modal .ad-subtitle { font-size: 0.85rem; color: var(--text-light); margin-bottom: 16px; }
+        .ad-modal .ad-countdown { font-size: 2.8rem; font-weight: 900; color: var(--primary); margin: 10px 0; }
+        .ad-modal .ad-progress-bar { width: 100%; height: 6px; background: #e8e0d5; border-radius: 3px; overflow: hidden; margin: 10px 0 16px; }
+        .ad-modal .ad-progress-fill { height: 100%; background: linear-gradient(90deg, #e74c3c, #f39c12); border-radius: 3px; transition: width 0.95s linear; }
         .ad-modal .btn-close-ad {
-            display:inline-block; padding:10px 28px; border-radius:25px; font-weight:700; font-size:0.95rem;
-            cursor:pointer; background:#4caf50; color:#fff; opacity:0; pointer-events:none; transform:translateY(8px);
-            transition:all 0.35s;
+            display: inline-block; padding: 10px 28px; border-radius: 25px; font-weight: 700; font-size: 0.95rem;
+            cursor: pointer; background: #4caf50; color: #fff; opacity: 0; pointer-events: none; transform: translateY(8px);
+            transition: all 0.35s;
         }
-        .ad-modal .btn-close-ad.visible { opacity:1; pointer-events:auto; transform:translateY(0); }
-        .ad-modal .btn-close-ad:hover { background:#388e3c; }
+        .ad-modal .btn-close-ad.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+        .ad-modal .btn-close-ad:hover { background: #388e3c; }
 
         .result-overlay {
-            position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); z-index:998;
-            display:flex; align-items:center; justify-content:center; animation: fade-in 0.3s ease;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 998;
+            display: flex; align-items: center; justify-content: center; animation: fade-in 0.3s ease;
         }
         .result-modal {
-            background:#fffef9; border-radius:var(--radius-lg); padding:28px 22px; text-align:center;
-            max-width:420px; width:90%; box-shadow:0 20px 50px rgba(0,0,0,0.4);
-            animation: pop-in 0.35s cubic-bezier(0.175,0.885,0.32,1.275);
+            background: #fffef9; border-radius: var(--radius-lg); padding: 28px 22px; text-align: center; max-width: 420px; width: 90%;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4); animation: pop-in 0.35s cubic-bezier(0.175,0.885,0.32,1.275);
         }
-        .result-icon { font-size:4rem; margin-bottom:6px; }
-        .result-title { font-weight:900; font-size:1.5rem; margin-bottom:4px; }
-        .result-subtitle { font-size:0.9rem; color:var(--text-light); margin-bottom:14px; }
-        .result-score { font-size:1.1rem; font-weight:700; color:var(--gold); margin-bottom:16px; }
-        .result-buttons { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
-        .btn-result { padding:11px 22px; border-radius:25px; font-weight:700; font-size:0.9rem; cursor:pointer; border:none; }
-        .btn-next { background:#4caf50; color:#fff; }
-        .btn-next:hover { background:#388e3c; }
-        .btn-retry { background:#ff9800; color:#fff; }
-        .btn-retry:hover { background:#f57c00; }
-        .btn-quit { background:#f5f0e8; color:var(--text); border:2px solid rgba(180,150,110,0.3); }
+        .result-modal .result-icon { font-size: 4rem; margin-bottom: 6px; }
+        .result-modal .result-title { font-weight: 900; font-size: 1.5rem; margin-bottom: 4px; letter-spacing: 1px; }
+        .result-modal .result-subtitle { font-size: 0.9rem; color: var(--text-light); margin-bottom: 14px; }
+        .result-modal .result-score { font-size: 1.1rem; font-weight: 700; color: var(--gold); margin-bottom: 16px; }
+        .result-modal .result-buttons { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+        .btn-result { padding: 11px 22px; border-radius: 25px; font-weight: 700; font-size: 0.9rem; cursor: pointer; border: none; letter-spacing: 0.5px; transition: all var(--transition); }
+        .btn-next { background: #4caf50; color: #fff; }
+        .btn-next:hover { background: #388e3c; }
+        .btn-retry { background: #ff9800; color: #fff; }
+        .btn-retry:hover { background: #f57c00; }
+        .btn-quit { background: #f5f0e8; color: var(--text); border: 2px solid rgba(180,150,110,0.3); }
+        .btn-quit:hover { background: #ede5d8; }
 
-        .level-select-overlay {
-            position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:997;
-            display:flex; align-items:center; justify-content:center; animation: fade-in 0.3s ease;
-        }
-        .level-select-modal {
-            background:#fffef9; border-radius:var(--radius-lg); padding:20px 16px; max-width:500px;
-            width:92%; max-height:80vh; overflow-y:auto;
-        }
+        .level-select-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:997; display:flex; align-items:center; justify-content:center; animation: fade-in 0.3s ease; }
+        .level-select-modal { background:#fffef9; border-radius:var(--radius-lg); padding:20px 16px; max-width:500px; width:92%; max-height:80vh; overflow-y:auto; }
         .level-select-modal h3 { text-align:center; font-size:1.3rem; font-weight:900; margin-bottom:14px; }
         .level-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(64px,1fr)); gap:10px; }
-        .level-cell {
-            aspect-ratio:1/1; border-radius:14px; display:flex; flex-direction:column; align-items:center;
-            justify-content:center; cursor:pointer; font-weight:700; font-size:0.85rem; transition:all var(--transition);
-            border:2px solid rgba(180,150,110,0.25); background:#fffef9; position:relative; font-family:var(--font-serif);
-        }
+        .level-cell { aspect-ratio:1/1; border-radius:14px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; font-weight:700; font-size:0.85rem; transition:all var(--transition); border:2px solid rgba(180,150,110,0.25); background:#fffef9; position:relative; font-family:var(--font-serif); }
         .level-cell:hover { border-color:var(--gold); box-shadow:0 4px 14px rgba(212,160,23,0.2); transform:translateY(-3px); }
         .level-cell.completed { background:#e8f5e9; border-color:#4caf50; color:#2e7d32; }
         .level-cell.completed::after { content:'✓'; position:absolute; top:4px; right:8px; font-size:0.7rem; color:#4caf50; font-weight:900; }
@@ -214,16 +465,12 @@
         .level-cell .level-stars { font-size:0.55rem; letter-spacing:-1px; }
         .close-level-select { display:block; margin:16px auto 0; padding:10px 28px; border-radius:25px; font-weight:700; cursor:pointer; background:#f5f0e8; color:var(--text); border:none; }
 
-        .toast {
-            position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#3e2f1c; color:#fff;
-            padding:10px 22px; border-radius:25px; font-weight:700; font-size:0.9rem; z-index:1000;
-            pointer-events:none; animation:toast-in 0.4s ease, toast-out 0.4s ease 1.6s forwards;
-        }
+        .toast { position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#3e2f1c; color:#fff; padding:10px 22px; border-radius:25px; font-weight:700; font-size:0.9rem; z-index:1000; pointer-events:none; animation:toast-in 0.4s ease, toast-out 0.4s ease 1.6s forwards; }
         @keyframes toast-in { from{opacity:0;transform:translateX(-50%) translateY(-30px);} to{opacity:1;transform:translateX(-50%) translateY(0);} }
         @keyframes toast-out { from{opacity:1;transform:translateX(-50%) translateY(0);} to{opacity:0;transform:translateX(-50%) translateY(-30px);} }
 
         @media (max-width: 600px) {
-            .game-main { flex-direction:column; align-items:center; gap:12px; padding:12px; }
+            .game-main { flex-direction: column; align-items: center; gap:12px; padding:12px; }
             .big-char-zone { max-width:260px; flex:none; }
             .big-char-wrapper { max-width:260px; max-height:260px; }
             .right-panel { width:100%; flex:none; }
@@ -276,6 +523,7 @@
         <div class="bottom-bar">
             <button class="btn btn-hint" id="btnHint">💡 提示</button>
             <button class="btn btn-revive" id="btnRevive" style="display:none;">❤️ 看广告续命</button>
+            <button class="btn btn-daily" id="btnDaily">📅 每日挑战</button>
             <button class="btn btn-levels" id="btnLevels">📂 关卡选择</button>
         </div>
     </div>
@@ -318,7 +566,28 @@
                 return;
             }
 
-            // ========== 游戏状态 ==========
+            // ==================== 汉字释义库 ====================
+            const charDescriptions = {
+                '大': '像一个张开双臂的人，表示大小的大。',
+                '天': '人头顶上方的天空，本义为头顶。',
+                '太': '大字下面加一点，表示过于、极。',
+                '木': '一棵树的样子，上为枝叶，下为根。',
+                '人': '侧面站立的人形。',
+                '从': '两人一前一后，表示跟从。',
+                '众': '三人为众，表示人多。',
+                '火': '火焰的形状。',
+                '灭': '火上加一横，表示用东西盖住火，即为灭。',
+                '口': '像一张嘴。',
+                '日': '太阳的形状。',
+                '月': '像一弯新月。',
+                '明': '日月组合，表示明亮。',
+                '林': '两棵树并排，表示树林。',
+                '森': '三木为森，表示森林。',
+                '休': '人靠在树旁休息。',
+                '好': '女子相伴，表示美好。',
+            };
+
+            // ==================== 游戏状态 ====================
             let currentLevelIndex = 0;
             let totalScore = 0;
             let foundSet = new Set();
@@ -330,6 +599,7 @@
             let isPaused = false;
             let hintUsedCount = 0;
             const MAX_HINTS = 2;
+            let doubleHintCount = 0;
             let reviveUsed = false;
             let adCallback = null;
             let adCountdownTimer = null;
@@ -342,7 +612,7 @@
             let lastRecoveryTime = Date.now();
             let recoveryTimerInterval = null;
 
-            // ========== DOM ==========
+            // ==================== DOM 元素 ====================
             const $ = (sel) => document.querySelector(sel);
             const bigCharWrapper = $('#bigCharWrapper');
             const bigCharCanvas = $('#bigCharCanvas');
@@ -356,6 +626,7 @@
             const levelTitle = $('#levelTitle');
             const btnHint = $('#btnHint');
             const btnRevive = $('#btnRevive');
+            const btnDaily = $('#btnDaily');
             const btnLevels = $('#btnLevels');
             const adOverlay = $('#adOverlay');
             const adTitle = $('#adTitle');
@@ -372,7 +643,7 @@
             const livesCount = $('#livesCount');
             const recoveryTimer = $('#recoveryTimer');
 
-            // ========== 音效 ==========
+            // ==================== 音效 ====================
             let audioCtx = null;
             function getAudioCtx() { if (!audioCtx) try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} return audioCtx; }
             function playBeep(freq, duration, type='sine', vol=0.15) {
@@ -391,17 +662,17 @@
             function sfxWin() { playBeep(660,0.12); setTimeout(()=>playBeep(880,0.12),120); setTimeout(()=>playBeep(1100,0.18),240); }
             function sfxTick() { playBeep(440,0.06,'square',0.08); }
 
-            // ========== Toast ==========
+            // ==================== Toast 通知 ====================
             function showToast(msg, duration=2000) {
                 const el = document.createElement('div'); el.className='toast'; el.textContent=msg;
                 toastContainer.appendChild(el);
                 setTimeout(()=>{ if(el.parentNode) el.remove(); }, duration+500);
             }
 
-            // ========== 持久化 ==========
+            // ==================== 持久化存储 ====================
             function saveProgress() {
                 try {
-                    const data = { totalScore, completedLevels: Array.from(completedLevels), currentLevelIndex, lives, lastRecoveryTime };
+                    const data = { totalScore, completedLevels: Array.from(completedLevels), currentLevelIndex, lives, lastRecoveryTime, doubleHintCount };
                     localStorage.setItem('hanzi_game_progress', JSON.stringify(data));
                 } catch(e) {}
             }
@@ -415,81 +686,65 @@
                         currentLevelIndex = data.currentLevelIndex || 0;
                         lives = data.lives != null ? data.lives : 3;
                         lastRecoveryTime = data.lastRecoveryTime || Date.now();
+                        doubleHintCount = data.doubleHintCount || 0;
                         if (currentLevelIndex >= levelData.length) currentLevelIndex = levelData.length - 1;
                         if (currentLevelIndex < 0) currentLevelIndex = 0;
                     }
                 } catch(e) {}
             }
 
-            // ========== 生命与恢复倒计时 ==========
+            // ==================== 生命值与恢复倒计时 ====================
             function updateLivesAndRecoveryDisplay() {
                 livesCount.textContent = lives;
                 btnRevive.style.display = (lives < MAX_LIVES) ? 'inline-flex' : 'none';
-
                 const now = Date.now();
                 const nextRecovery = lastRecoveryTime + RECOVERY_INTERVAL;
                 const remaining = Math.max(0, Math.ceil((nextRecovery - now) / 1000));
-
                 if (lives >= MAX_LIVES) {
                     recoveryTimer.textContent = '';
                     return;
                 }
-
                 const mins = Math.floor(remaining / 60);
                 const secs = remaining % 60;
                 recoveryTimer.textContent = `恢复 ${mins}:${secs.toString().padStart(2,'0')}`;
-
-                // 自动恢复
                 if (remaining <= 0) {
                     lives = Math.min(lives + 1, MAX_LIVES);
                     lastRecoveryTime = now;
                     showToast('❤️ 自动恢复1条命', 2000);
                     saveProgress();
-                    updateLivesAndRecoveryDisplay(); // 递归更新
+                    updateLivesAndRecoveryDisplay();
                 }
             }
-
             function resetRecoveryTimer() {
                 lastRecoveryTime = Date.now();
                 updateLivesAndRecoveryDisplay();
                 saveProgress();
             }
-
-            // 损失生命
+            function startRecoveryTimer() {
+                if (recoveryTimerInterval) clearInterval(recoveryTimerInterval);
+                recoveryTimerInterval = setInterval(updateLivesAndRecoveryDisplay, 500);
+            }
             function loseLife() {
                 if (lives > 0) {
                     lives--;
-                    if (lives < MAX_LIVES) {
-                        // 重新开始恢复倒计时
-                        resetRecoveryTimer();
-                    }
+                    if (lives < MAX_LIVES) resetRecoveryTimer();
                     updateLivesAndRecoveryDisplay();
                     saveProgress();
-                    if (lives === 0) {
-                        showToast('💔 生命耗尽！看广告续命或等待5分钟恢复', 3000);
-                    }
+                    if (lives === 0) showToast('💔 生命耗尽！看广告续命或等待5分钟恢复', 3000);
                 }
             }
-
-            // 看广告续命
             function reviveLife() {
                 if (lives >= MAX_LIVES) return;
                 showAd('📺 观看广告续命', '广告结束后将恢复1条命', () => {
                     lives = Math.min(lives + 1, MAX_LIVES);
-                    resetRecoveryTimer(); // 重置恢复倒计时
+                    resetRecoveryTimer();
                     updateLivesAndRecoveryDisplay();
                     saveProgress();
                     showToast('❤️ +1条命！', 1500);
                 });
             }
 
-            // 启动恢复定时器
-            function startRecoveryTimer() {
-                if (recoveryTimerInterval) clearInterval(recoveryTimerInterval);
-                recoveryTimerInterval = setInterval(updateLivesAndRecoveryDisplay, 500);
-            }
-
-            // ========== Canvas ==========
+            // ==================== Canvas 绘制 ====================
             function drawBigChar(character) {
                 const rect = bigCharWrapper.getBoundingClientRect();
                 const dpr = window.devicePixelRatio || 1;
@@ -514,21 +769,7 @@
             }
             function redrawCanvas() { const level = levelData[currentLevelIndex]; if(level) drawBigChar(level.character); }
 
-            function spawnRipple(x,y) {
-                const ripple = document.createElement('div'); ripple.className='ripple';
-                const size = Math.max(bigCharWrapper.offsetWidth, bigCharWrapper.offsetHeight)*0.3;
-                ripple.style.width=size+'px'; ripple.style.height=size+'px';
-                ripple.style.left=(x-size/2)+'px'; ripple.style.top=(y-size/2)+'px';
-                bigCharWrapper.appendChild(ripple);
-                ripple.addEventListener('animationend', ()=>ripple.remove());
-            }
-            bigCharWrapper.addEventListener('click', (e) => {
-                if (!isGameActive || isPaused) return;
-                const rect = bigCharWrapper.getBoundingClientRect();
-                spawnRipple(e.clientX-rect.left, e.clientY-rect.top);
-            });
-
-            // ========== 游戏逻辑 ==========
+            // ==================== 游戏核心逻辑 ====================
             function getCurrentLevel() { return levelData[currentLevelIndex]; }
             function shuffleArray(arr) { const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
             function buildCandidateList() {
@@ -570,10 +811,7 @@
 
             function handleChipClick(chip, word) {
                 if (!isGameActive || isPaused) return;
-                if (lives <= 0) {
-                    showToast('💔 生命不足，请续命后再作答', 2000);
-                    return;
-                }
+                if (lives <= 0) { showToast('💔 生命不足，请续命后再作答', 2000); return; }
                 const level = getCurrentLevel();
                 if (foundSet.has(word)) return;
                 if (level.hiddenWords.includes(word)) {
@@ -590,9 +828,11 @@
                     chip.classList.add('wrong-flash');
                     sfxWrong();
                     timeLeft = Math.max(0, timeLeft - 3);
+                    totalScore = Math.max(0, totalScore - 5); // 答错扣5分
                     updateTimerDisplay();
+                    updateScoreDisplay();
                     loseLife();
-                    showToast(`❌ 「${word}」不在这个字里哦，-3秒`, 2000);
+                    showToast(`❌ 错！-3秒 -5分 (生命-1)`, 2000);
                     setTimeout(() => chip.classList.remove('wrong-flash'), 500);
                 }
             }
@@ -605,6 +845,10 @@
                 completedLevels.add(currentLevelIndex);
                 saveProgress();
                 sfxWin();
+                if (typeof window._dailyChallengeIndex !== 'undefined') {
+                    completeDailyChallenge(window._dailyChallengeIndex);
+                    delete window._dailyChallengeIndex;
+                }
                 showResultModal(true);
             }
             function handleTimeUp() {
@@ -642,6 +886,7 @@
                 timerDisplay.classList.remove('warning');
                 updateScoreDisplay();
                 btnHint.disabled = false;
+                updateHintAvailability();
             }
             function loadLevel(index) {
                 if (index < 0 || index >= levelData.length) return;
@@ -662,7 +907,7 @@
                 adOverlay.style.display = 'none';
             }
 
-            // ========== 广告系统 ==========
+            // ==================== 广告系统 ====================
             function showAd(title, subtitle, callback) {
                 if (adCountdownTimer) clearInterval(adCountdownTimer);
                 adCallback = callback;
@@ -695,17 +940,21 @@
                 isPaused = false;
                 if (adCallback) { const cb = adCallback; adCallback = null; cb(); }
             }
-            btnCloseAd.addEventListener('click', () => {
-                if (btnCloseAd.classList.contains('visible')) closeAd();
-            });
+            btnCloseAd.addEventListener('click', () => { if (btnCloseAd.classList.contains('visible')) closeAd(); });
 
+            // ==================== 提示系统（双倍道具） ====================
+            function updateHintAvailability() {
+                const totalAllowed = MAX_HINTS + doubleHintCount;
+                btnHint.disabled = hintUsedCount >= totalAllowed;
+            }
             btnHint.addEventListener('click', () => {
                 if (!isGameActive || isPaused) return;
                 if (lives <= 0) { showToast('💔 生命不足，无法使用提示', 1500); return; }
                 const level = getCurrentLevel();
                 const unfound = level.hiddenWords.filter(w => !foundSet.has(w));
                 if (unfound.length === 0) { showToast('所有隐藏字都已找到！', 1500); return; }
-                if (hintUsedCount >= MAX_HINTS) { showToast('本关提示次数已用完', 1800); return; }
+                const totalAllowed = MAX_HINTS + doubleHintCount;
+                if (hintUsedCount >= totalAllowed) { showToast('提示次数已用完', 1800); return; }
                 showAd('💡 观看广告获取提示', '广告结束后将自动解锁一个隐藏字', () => {
                     const stillUnfound = level.hiddenWords.filter(w => !foundSet.has(w));
                     if (stillUnfound.length > 0) {
@@ -715,28 +964,116 @@
                         const chips = candidateChips.querySelectorAll('.candidate-chip');
                         chips.forEach(ch => { if(ch.dataset.word === pick) ch.classList.add('found'); });
                         hintUsedCount++;
+                        if (doubleHintCount > 0 && hintUsedCount <= MAX_HINTS + doubleHintCount) {
+                            const nextUnfound = level.hiddenWords.filter(w => !foundSet.has(w));
+                            if (nextUnfound.length > 0) {
+                                const second = nextUnfound[Math.floor(Math.random() * nextUnfound.length)];
+                                foundSet.add(second);
+                                updateFoundCellsDisplay();
+                                const chips2 = candidateChips.querySelectorAll('.candidate-chip');
+                                chips2.forEach(ch => { if(ch.dataset.word === second) ch.classList.add('found'); });
+                                hintUsedCount++;
+                                doubleHintCount--;
+                                saveProgress();
+                                showToast('💡 双倍提示！额外解锁「' + second + '」', 2000);
+                            }
+                        }
                         showToast('💡 已解锁「' + pick + '」', 1800);
                         totalScore += 5;
                         updateScoreDisplay();
                         saveProgress();
+                        updateHintAvailability();
                         if (foundSet.size >= level.hiddenWords.length) handleWin();
                     }
-                    if (hintUsedCount >= MAX_HINTS) btnHint.disabled = true;
                 });
             });
 
-            btnRevive.addEventListener('click', reviveLife);
+            // ==================== 每日挑战 ====================
+            const DAILY_KEY = 'hanzi_daily_challenge';
+            function getTodayStr() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+            function loadDailyData() {
+                try { const raw = localStorage.getItem(DAILY_KEY); if (raw) { const data = JSON.parse(raw); if (data.date === getTodayStr()) return data; } } catch(e) {}
+                return null;
+            }
+            function saveDailyData(data) { localStorage.setItem(DAILY_KEY, JSON.stringify(data)); }
+            function generateDailyChallenge() {
+                const easyPool = levelData.filter(l => l.difficulty <= 2);
+                const mediumPool = levelData.filter(l => l.difficulty >= 3 && l.difficulty <= 4);
+                const hardPool = levelData.filter(l => l.difficulty >= 5);
+                if (easyPool.length === 0 || mediumPool.length === 0 || hardPool.length === 0) { showToast('关卡不足，无法生成每日挑战', 3000); return null; }
+                const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+                const challenges = [
+                    { type: '简单', levelId: pickRandom(easyPool).id },
+                    { type: '中等', levelId: pickRandom(mediumPool).id },
+                    { type: '地狱', levelId: pickRandom(hardPool).id }
+                ];
+                const data = { date: getTodayStr(), challenges, completed: [false, false, false] };
+                saveDailyData(data);
+                return data;
+            }
+            function getDailyData() { let data = loadDailyData(); if (!data) data = generateDailyChallenge(); return data; }
+            function completeDailyChallenge(index) {
+                const data = loadDailyData(); if (!data || data.date !== getTodayStr()) return false;
+                data.completed[index] = true;
+                saveDailyData(data);
+                if (data.completed.every(v => v)) {
+                    doubleHintCount += 2;
+                    saveProgress();
+                    updateHintAvailability();
+                    showToast('🎉 完成全部每日挑战！获得双倍提示道具x2！', 3500);
+                }
+                return true;
+            }
+            window.startDailyLevel = function(index) {
+                const data = loadDailyData(); if (!data) return;
+                const levelId = data.challenges[index].levelId;
+                const levelIndex = levelData.findIndex(l => l.id === levelId);
+                if (levelIndex >= 0) {
+                    document.getElementById('dailyOverlay')?.remove();
+                    loadLevel(levelIndex);
+                    window._dailyChallengeIndex = index;
+                }
+            };
+            btnDaily.addEventListener('click', () => {
+                if (isGameActive && !isPaused) isPaused = true;
+                const data = getDailyData(); if (!data) return;
+                let html = `<h3>📅 每日挑战 (${data.date})</h3><div style="display:flex; flex-direction:column; gap:12px;">`;
+                data.challenges.forEach((ch, idx) => {
+                    const level = levelData.find(l => l.id === ch.levelId);
+                    const completed = data.completed[idx];
+                    html += `<div style="display:flex; align-items:center; justify-content:space-between; padding:10px; background:#fef9f0; border-radius:12px;">
+                        <span>${ch.type}：<b>${level.character}</b> (第${level.id}关)</span>
+                        <button class="btn" ${completed ? 'disabled' : ''} onclick="startDailyLevel(${idx})">${completed ? '已完成' : '挑战'}</button>
+                    </div>`;
+                });
+                html += `<button class="btn" style="margin-top:12px;" onclick="document.getElementById('dailyOverlay').remove(); if(window.isPaused) isPaused=false;">关闭</button>`;
+                let overlay = document.createElement('div'); overlay.id = 'dailyOverlay'; overlay.className = 'level-select-overlay';
+                overlay.innerHTML = `<div class="level-select-modal" style="text-align:center;">${html}</div>`;
+                document.body.appendChild(overlay);
+                overlay.addEventListener('click', (e) => { if (e.target === overlay) { overlay.remove(); if (isPaused && isGameActive) isPaused = false; } });
+            });
 
-            // ========== 结果弹窗 ==========
+            // ==================== 结果弹窗与科普 ====================
+            function getCharDescription(character) {
+                const level = levelData.find(l => l.character === character);
+                if (level && level.description) return level.description;
+                return charDescriptions[character] || null;
+            }
             function showResultModal(isWin) {
                 resultOverlay.style.display = 'flex';
                 const level = getCurrentLevel();
+                let extraHTML = '';
+                if (isWin) {
+                    const desc = getCharDescription(level.character);
+                    if (desc) extraHTML = `<div style="background:#fef9e7; border-radius:12px; padding:12px; margin:12px 0; font-size:0.9rem; color:#5d4e37; text-align:left;">📖 <b>汉字科普：</b>${desc}</div>`;
+                }
                 if (isWin) {
                     resultModal.innerHTML = `
                         <div class="result-icon">🎉</div>
                         <div class="result-title" style="color:#4caf50;">恭喜通关！</div>
                         <div class="result-subtitle">你成功找出了「${level.character}」中所有的隐藏字</div>
                         <div class="result-score">🪙 通关奖励 +100分 | 总分：${totalScore}</div>
+                        ${extraHTML}
                         <div class="result-buttons">
                             ${currentLevelIndex < levelData.length - 1 ? '<button class="btn-result btn-next" id="btnNextLevel">▶ 下一关</button>' : '<button class="btn-result btn-next" style="background:#gold;color:#3e2f1c;">🏆 全部通关！</button>'}
                             <button class="btn-result btn-retry" id="btnRetryLevel">🔄 重玩本关</button>
@@ -755,52 +1092,26 @@
                         </div>`;
                 }
                 setTimeout(() => {
-                    const btnNext = $('#btnNextLevel');
-                    const btnRetry = $('#btnRetryLevel');
-                    const btnQuit = $('#btnQuitResult');
-                    const btnReviveTime = $('#btnReviveTime');
-                    if (btnNext) btnNext.addEventListener('click', () => {
-                        resultOverlay.style.display = 'none';
-                        if (currentLevelIndex < levelData.length - 1) loadLevel(currentLevelIndex + 1);
-                        else { showToast('🏆 恭喜！你已通关全部关卡！', 3000); loadLevel(0); }
-                    });
+                    const btnNext = $('#btnNextLevel'); const btnRetry = $('#btnRetryLevel'); const btnQuit = $('#btnQuitResult'); const btnReviveTime = $('#btnReviveTime');
+                    if (btnNext) btnNext.addEventListener('click', () => { resultOverlay.style.display = 'none'; if (currentLevelIndex < levelData.length - 1) loadLevel(currentLevelIndex + 1); else { showToast('🏆 恭喜！你已通关全部关卡！', 3000); loadLevel(0); } });
                     if (btnRetry) btnRetry.addEventListener('click', () => { resultOverlay.style.display = 'none'; loadLevel(currentLevelIndex); });
                     if (btnQuit) btnQuit.addEventListener('click', () => { resultOverlay.style.display = 'none'; openLevelSelect(); });
-                    if (btnReviveTime) btnReviveTime.addEventListener('click', () => {
-                        resultOverlay.style.display = 'none';
-                        showAd('📺 观看广告获得加时', '广告结束后增加30秒继续挑战', () => {
-                            timeLeft += BONUS_TIME;
-                            reviveUsed = true;
-                            isGameActive = true;
-                            isPaused = false;
-                            updateTimerDisplay();
-                            timerDisplay.classList.remove('warning');
-                            startTimer();
-                            showToast('⏱ +30秒！继续加油！', 2000);
-                        });
-                    });
+                    if (btnReviveTime) btnReviveTime.addEventListener('click', () => { resultOverlay.style.display = 'none'; showAd('📺 观看广告获得加时', '广告结束后增加30秒继续挑战', () => { timeLeft += BONUS_TIME; reviveUsed = true; isGameActive = true; isPaused = false; updateTimerDisplay(); timerDisplay.classList.remove('warning'); startTimer(); showToast('⏱ +30秒！继续加油！', 2000); }); });
                 }, 100);
             }
 
-            function openLevelSelect() {
-                levelSelectOverlay.style.display = 'flex';
-                renderLevelGrid();
-            }
+            // ==================== 关卡选择 ====================
+            function openLevelSelect() { levelSelectOverlay.style.display = 'flex'; renderLevelGrid(); }
             function renderLevelGrid() {
                 levelGrid.innerHTML = '';
                 levelData.forEach((lv, idx) => {
-                    const cell = document.createElement('div');
-                    cell.className = 'level-cell';
+                    const cell = document.createElement('div'); cell.className = 'level-cell';
                     if (completedLevels.has(idx)) cell.classList.add('completed');
                     if (idx === currentLevelIndex && !completedLevels.has(idx)) cell.classList.add('current');
                     const isUnlocked = idx === 0 || completedLevels.has(idx-1) || completedLevels.has(idx);
                     if (!isUnlocked && idx > 0) cell.classList.add('locked');
                     cell.innerHTML = `<span class="level-num">${lv.id}</span><span class="level-char">${lv.character}</span><span class="level-stars">${'★'.repeat(lv.difficulty)}</span>`;
-                    cell.addEventListener('click', () => {
-                        if (cell.classList.contains('locked')) return;
-                        levelSelectOverlay.style.display = 'none';
-                        loadLevel(idx);
-                    });
+                    cell.addEventListener('click', () => { if (cell.classList.contains('locked')) return; levelSelectOverlay.style.display = 'none'; loadLevel(idx); });
                     levelGrid.appendChild(cell);
                 });
             }
@@ -809,6 +1120,10 @@
             levelSelectOverlay.addEventListener('click', (e) => { if (e.target === levelSelectOverlay) { levelSelectOverlay.style.display = 'none'; if (isPaused && isGameActive) isPaused = false; } });
             resultOverlay.addEventListener('click', (e) => { if (e.target === resultOverlay) resultOverlay.style.display = 'none'; });
 
+            // ==================== 按钮事件 ====================
+            btnRevive.addEventListener('click', reviveLife);
+
+            // ==================== 窗口事件 ====================
             window.addEventListener('resize', () => setTimeout(redrawCanvas, 250));
             window.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
@@ -818,7 +1133,7 @@
                 }
             });
 
-            // 初始化
+            // ==================== 初始化 ====================
             function init() {
                 loadProgress();
                 if (currentLevelIndex >= levelData.length) currentLevelIndex = 0;
@@ -826,11 +1141,12 @@
                 updateScoreDisplay();
                 updateLivesAndRecoveryDisplay();
                 startRecoveryTimer();
+                updateHintAvailability();
                 loadLevel(currentLevelIndex);
                 setTimeout(redrawCanvas, 200);
             }
             init();
-            console.log('🀄 汉字拆字大师 - 生命值系统已启动');
+            console.log('🀄 汉字拆字大师 - 生命值+每日挑战+扣分机制已启动');
         })();
     </script>
 </body>
