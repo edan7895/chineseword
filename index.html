@@ -1064,9 +1064,17 @@
                 const level = getCurrentLevel();
                 let extraHTML = '';
                 if (isWin) {
-                    const desc = getCharDescription(level.character);
-                    if (desc) extraHTML = `<div style="background:#fef9e7; border-radius:12px; padding:12px; margin:12px 0; font-size:0.9rem; color:#5d4e37; text-align:left;">📖 <b>汉字科普：</b>${desc}</div>`;
-                }
+    // 优先使用 level.js 中的 description，没有则回退到内置词典
+    const desc = level.description || charDescriptions[level.character];
+    if (desc) {
+        extraHTML += `<div style="background:#fef9e7; border-radius:12px; padding:12px; margin:12px 0; font-size:0.9rem; color:#5d4e37; text-align:left;">📖 <b>汉字科普：</b>${desc}</div>`;
+    }
+    // 显示造句（如果存在）
+    const sentence = level.sentence;
+    if (sentence) {
+        extraHTML += `<div style="background:#fef9e7; border-radius:12px; padding:12px; margin:12px 0; font-size:0.9rem; color:#5d4e37; text-align:left;">✏️ <b>造句：</b>${sentence}</div>`;
+    }
+}
                 if (isWin) {
                     resultModal.innerHTML = `
                         <div class="result-icon">🎉</div>
