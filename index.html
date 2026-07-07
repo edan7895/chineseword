@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>汉字拆字大师 - 寻字解谜</title>
 
-    <link rel="icon" href="data:,">
+
+<link rel="icon" href="data:,">
     <style>
         :root {
             --bg: #fdf6ee;
@@ -561,603 +562,566 @@
     <div id="toastContainer"></div>
 
     <script src="level.js"></script>
-    <script>
-        (function() {
-            if (typeof levelData === 'undefined') {
-                alert('关卡数据加载失败，请检查 level.js 文件是否存在。');
-                return;
-            }
-
-            // ==================== 汉字释义库 ====================
-            const charDescriptions = {
-                '大': '像一个张开双臂的人，表示大小的大。',
-                '天': '人头顶上方的天空，本义为头顶。',
-                '太': '大字下面加一点，表示过于、极。',
-                '木': '一棵树的样子，上为枝叶，下为根。',
-                '人': '侧面站立的人形。',
-                '从': '两人一前一后，表示跟从。',
-                '众': '三人为众，表示人多。',
-                '火': '火焰的形状。',
-                '灭': '火上加一横，表示用东西盖住火，即为灭。',
-                '口': '像一张嘴。',
-                '日': '太阳的形状。',
-                '月': '像一弯新月。',
-                '明': '日月组合，表示明亮。',
-                '林': '两棵树并排，表示树林。',
-                '森': '三木为森，表示森林。',
-                '休': '人靠在树旁休息。',
-                '好': '女子相伴，表示美好。',
-            };
-
-            // ==================== 游戏状态 ====================
-            let currentLevelIndex = 0;
-            let totalScore = 0;
-            let foundSet = new Set();
-            let timeLeft = 90;
-            const TOTAL_TIME = 90;
-            const BONUS_TIME = 30;
-            let timerInterval = null;
-            let isGameActive = false;
-            let isPaused = false;
-            let hintUsedCount = 0;
-            const MAX_HINTS = 2;
-            let doubleHintCount = 0;
-            let reviveUsed = false;
-            let adCallback = null;
-            let adCountdownTimer = null;
-            let completedLevels = new Set();
-
-            // 生命值系统
-            let lives = 3;
-            const MAX_LIVES = 3;
-            const RECOVERY_INTERVAL = 5 * 60 * 1000; // 5分钟
-            let lastRecoveryTime = Date.now();
-            let recoveryTimerInterval = null;
-
-            // ==================== DOM 元素 ====================
-            const $ = (sel) => document.querySelector(sel);
-            const bigCharWrapper = $('#bigCharWrapper');
-            const bigCharCanvas = $('#bigCharCanvas');
-            const ctx = bigCharCanvas.getContext('2d');
-            const foundCells = $('#foundCells');
-            const candidateChips = $('#candidateChips');
-            const progressMini = $('#progressMini');
-            const timerDisplay = $('#timerDisplay');
-            const scoreDisplay = $('#scoreDisplay');
-            const levelBadge = $('#levelBadge');
-            const levelTitle = $('#levelTitle');
-            const btnHint = $('#btnHint');
-            const btnRevive = $('#btnRevive');
-            const btnDaily = $('#btnDaily');
-            const btnLevels = $('#btnLevels');
-            const adOverlay = $('#adOverlay');
-            const adTitle = $('#adTitle');
-            const adSubtitle = $('#adSubtitle');
-            const adCountdown = $('#adCountdown');
-            const adProgressFill = $('#adProgressFill');
-            const btnCloseAd = $('#btnCloseAd');
-            const resultOverlay = $('#resultOverlay');
-            const resultModal = $('#resultModal');
-            const levelSelectOverlay = $('#levelSelectOverlay');
-            const levelGrid = $('#levelGrid');
-            const btnCloseLevelSelect = $('#btnCloseLevelSelect');
-            const toastContainer = $('#toastContainer');
-            const livesCount = $('#livesCount');
-            const recoveryTimer = $('#recoveryTimer');
-
-            // ==================== 音效 ====================
-            let audioCtx = null;
-            function getAudioCtx() { if (!audioCtx) try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} return audioCtx; }
-            function playBeep(freq, duration, type='sine', vol=0.15) {
-                const ctx = getAudioCtx(); if(!ctx) return;
-                try {
-                    const osc = ctx.createOscillator(); const gain = ctx.createGain();
-                    osc.type = type; osc.frequency.value = freq;
-                    gain.gain.setValueAtTime(vol, ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
-                    osc.connect(gain); gain.connect(ctx.destination);
-                    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + duration);
-                } catch(e) {}
-            }
-            function sfxCorrect() { playBeep(880,0.12); playBeep(1100,0.1); }
-            function sfxWrong() { playBeep(180,0.25,'triangle',0.2); }
-            function sfxWin() { playBeep(660,0.12); setTimeout(()=>playBeep(880,0.12),120); setTimeout(()=>playBeep(1100,0.18),240); }
-            function sfxTick() { playBeep(440,0.06,'square',0.08); }
-
-            // ==================== Toast 通知 ====================
-            function showToast(msg, duration=2000) {
-                const el = document.createElement('div'); el.className='toast'; el.textContent=msg;
-                toastContainer.appendChild(el);
-                setTimeout(()=>{ if(el.parentNode) el.remove(); }, duration+500);
-            }
-
-            // ==================== 持久化存储 ====================
-            function saveProgress() {
-                try {
-                    const data = { totalScore, completedLevels: Array.from(completedLevels), currentLevelIndex, lives, lastRecoveryTime, doubleHintCount };
-                    localStorage.setItem('hanzi_game_progress', JSON.stringify(data));
-                } catch(e) {}
-            }
-            function loadProgress() {
-                try {
-                    const raw = localStorage.getItem('hanzi_game_progress');
-                    if (raw) {
-                        const data = JSON.parse(raw);
-                        totalScore = data.totalScore || 0;
-                        completedLevels = new Set(data.completedLevels || []);
-                        currentLevelIndex = data.currentLevelIndex || 0;
-                        lives = data.lives != null ? data.lives : 3;
-                        lastRecoveryTime = data.lastRecoveryTime || Date.now();
-                        doubleHintCount = data.doubleHintCount || 0;
-                        if (currentLevelIndex >= levelData.length) currentLevelIndex = levelData.length - 1;
-                        if (currentLevelIndex < 0) currentLevelIndex = 0;
-                    }
-                } catch(e) {}
-            }
-
-            // ==================== 生命值与恢复倒计时 ====================
-            function updateLivesAndRecoveryDisplay() {
-                livesCount.textContent = lives;
-                btnRevive.style.display = (lives < MAX_LIVES) ? 'inline-flex' : 'none';
-                const now = Date.now();
-                const nextRecovery = lastRecoveryTime + RECOVERY_INTERVAL;
-                const remaining = Math.max(0, Math.ceil((nextRecovery - now) / 1000));
-                if (lives >= MAX_LIVES) {
-                    recoveryTimer.textContent = '';
-                    return;
-                }
-                const mins = Math.floor(remaining / 60);
-                const secs = remaining % 60;
-                recoveryTimer.textContent = `恢复 ${mins}:${secs.toString().padStart(2,'0')}`;
-                if (remaining <= 0) {
-                    lives = Math.min(lives + 1, MAX_LIVES);
-                    lastRecoveryTime = now;
-                    showToast('❤️ 自动恢复1条命', 2000);
-                    saveProgress();
-                    updateLivesAndRecoveryDisplay();
-                }
-            }
-            function resetRecoveryTimer() {
-                lastRecoveryTime = Date.now();
-                updateLivesAndRecoveryDisplay();
-                saveProgress();
-            }
-            function startRecoveryTimer() {
-                if (recoveryTimerInterval) clearInterval(recoveryTimerInterval);
-                recoveryTimerInterval = setInterval(updateLivesAndRecoveryDisplay, 500);
-            }
-            function loseLife() {
-                if (lives > 0) {
-                    lives--;
-                    if (lives < MAX_LIVES) resetRecoveryTimer();
-                    updateLivesAndRecoveryDisplay();
-                    saveProgress();
-                    if (lives === 0) showToast('💔 生命耗尽！看广告续命或等待5分钟恢复', 3000);
-                }
-            }
-            function reviveLife() {
-                if (lives >= MAX_LIVES) return;
-                showAd('📺 观看广告续命', '广告结束后将恢复1条命', () => {
-                    lives = Math.min(lives + 1, MAX_LIVES);
-                    resetRecoveryTimer();
-                    updateLivesAndRecoveryDisplay();
-                    saveProgress();
-                    showToast('❤️ +1条命！', 1500);
-                });
-            }
-
-            // ==================== Canvas 绘制 ====================
-            function drawBigChar(character) {
-                const rect = bigCharWrapper.getBoundingClientRect();
-                const dpr = window.devicePixelRatio || 1;
-                const w = rect.width, h = rect.height;
-                if (w<=0||h<=0) return;
-                bigCharCanvas.width = w*dpr; bigCharCanvas.height = h*dpr;
-                bigCharCanvas.style.width = w+'px'; bigCharCanvas.style.height = h+'px';
-                ctx.setTransform(1,0,0,1,0,0); ctx.scale(dpr,dpr);
-                ctx.fillStyle='#fffef9'; ctx.fillRect(0,0,w,h);
-                const cx=w/2, cy=h/2, margin=w*0.12;
-                ctx.strokeStyle='rgba(180,150,110,0.35)'; ctx.lineWidth=1.2;
-                ctx.setLineDash([6,4]);
-                ctx.beginPath(); ctx.moveTo(margin,cy); ctx.lineTo(w-margin,cy); ctx.moveTo(cx,margin); ctx.lineTo(cx,h-margin); ctx.stroke();
-                ctx.setLineDash([]);
-                ctx.strokeStyle='rgba(180,150,110,0.55)'; ctx.lineWidth=2.5; ctx.strokeRect(margin,margin,w-2*margin,h-2*margin);
-                const fontSize = Math.min(w,h)*0.58;
-                ctx.fillStyle='#3e2f1c'; ctx.font=`700 ${fontSize}px "STKaiti","KaiTi","楷体","Noto Serif SC","Songti SC","宋体",serif`;
-                ctx.textAlign='center'; ctx.textBaseline='middle';
-                ctx.fillText(character, cx, cy);
-                ctx.fillStyle='rgba(0,0,0,0.04)'; ctx.fillText(character, cx+1.5, cy+2);
-                ctx.fillStyle='#3e2f1c'; ctx.fillText(character, cx, cy);
-            }
-            function redrawCanvas() { const level = levelData[currentLevelIndex]; if(level) drawBigChar(level.character); }
-
-            // ==================== 游戏核心逻辑 ====================
-            function getCurrentLevel() { return levelData[currentLevelIndex]; }
-            function shuffleArray(arr) { const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
-            function buildCandidateList() {
-                const level = getCurrentLevel();
-                return shuffleArray([...new Set([...level.hiddenWords, ...level.distractors])]);
-            }
-
-            function renderFoundCells() {
-                const level = getCurrentLevel();
-                foundCells.innerHTML = '';
-                for(let i=0; i<level.hiddenWords.length; i++) {
-                    const cell = document.createElement('div'); cell.className='found-cell'; foundCells.appendChild(cell);
-                }
-                updateFoundCellsDisplay();
-                progressMini.textContent = `0 / ${level.hiddenWords.length}`;
-            }
-            function updateFoundCellsDisplay() {
-                const level = getCurrentLevel();
-                const cells = foundCells.querySelectorAll('.found-cell');
-                const foundArr = Array.from(foundSet);
-                cells.forEach((cell,i) => {
-                    if(i < foundArr.length) { cell.textContent = foundArr[i]; cell.classList.add('filled'); }
-                    else { cell.textContent = ''; cell.classList.remove('filled'); }
-                });
-                progressMini.textContent = `${foundArr.length} / ${level.hiddenWords.length}`;
-            }
-            function renderCandidateChips(candidates) {
-                candidateChips.innerHTML = '';
-                candidates.forEach(word => {
-                    const chip = document.createElement('button');
-                    chip.className = 'candidate-chip';
-                    chip.textContent = word;
-                    chip.dataset.word = word;
-                    if(foundSet.has(word)) chip.classList.add('found');
-                    chip.addEventListener('click', () => handleChipClick(chip, word));
-                    candidateChips.appendChild(chip);
-                });
-            }
-
-            function handleChipClick(chip, word) {
-                if (!isGameActive || isPaused) return;
-                if (lives <= 0) { showToast('💔 生命不足，请续命后再作答', 2000); return; }
-                const level = getCurrentLevel();
-                if (foundSet.has(word)) return;
-                if (level.hiddenWords.includes(word)) {
-                    foundSet.add(word);
-                    chip.classList.add('found');
-                    updateFoundCellsDisplay();
-                    sfxCorrect();
-                    totalScore += 10;
-                    updateScoreDisplay();
-                    saveProgress();
-                    showToast('✅ 找到了「' + word + '」！+10分', 1500);
-                    if (foundSet.size >= level.hiddenWords.length) handleWin();
-                } else {
-                    chip.classList.add('wrong-flash');
-                    sfxWrong();
-                    timeLeft = Math.max(0, timeLeft - 3);
-                    totalScore = Math.max(0, totalScore - 5); // 答错扣5分
-                    updateTimerDisplay();
-                    updateScoreDisplay();
-                    loseLife();
-                    showToast(`❌ 错！-3秒 -5分 (生命-1)`, 2000);
-                    setTimeout(() => chip.classList.remove('wrong-flash'), 500);
-                }
-            }
-
-            function handleWin() {
-                clearInterval(timerInterval);
-                isGameActive = false;
-                totalScore += 100;
-                updateScoreDisplay();
-                completedLevels.add(currentLevelIndex);
-                saveProgress();
-                sfxWin();
-                if (typeof window._dailyChallengeIndex !== 'undefined') {
-                    completeDailyChallenge(window._dailyChallengeIndex);
-                    delete window._dailyChallengeIndex;
-                }
-                showResultModal(true);
-            }
-            function handleTimeUp() {
-                clearInterval(timerInterval);
-                isGameActive = false;
-                showResultModal(false);
-            }
-            function updateTimerDisplay() {
-                const mins = Math.floor(timeLeft/60);
-                const secs = timeLeft%60;
-                timerDisplay.textContent = `⏱ ${mins}:${secs.toString().padStart(2,'0')}`;
-                timerDisplay.classList.toggle('warning', timeLeft <= 15);
-            }
-            function updateScoreDisplay() { scoreDisplay.textContent = totalScore; }
-            function startTimer() {
-                clearInterval(timerInterval);
-                updateTimerDisplay();
-                timerInterval = setInterval(() => {
-                    if (isPaused) return;
-                    timeLeft--;
-                    updateTimerDisplay();
-                    if (timeLeft <= 15 && timeLeft > 0) sfxTick();
-                    if (timeLeft <= 0) handleTimeUp();
-                }, 1000);
-            }
-            function resetGameState() {
-                clearInterval(timerInterval);
-                foundSet.clear();
-                timeLeft = TOTAL_TIME;
-                isGameActive = true;
-                isPaused = false;
-                hintUsedCount = 0;
-                reviveUsed = false;
-                updateTimerDisplay();
-                timerDisplay.classList.remove('warning');
-                updateScoreDisplay();
-                btnHint.disabled = false;
-                updateHintAvailability();
-            }
-            function loadLevel(index) {
-                if (index < 0 || index >= levelData.length) return;
-                currentLevelIndex = index;
-                resetGameState();
-                const level = getCurrentLevel();
-                levelBadge.textContent = `第${level.id}关`;
-                levelTitle.textContent = '★'.repeat(level.difficulty) + '☆'.repeat(5-level.difficulty);
-                renderFoundCells();
-                renderCandidateChips(buildCandidateList());
-                redrawCanvas();
-                startTimer();
-                updateScoreDisplay();
-                updateLivesAndRecoveryDisplay();
-                saveProgress();
-                resultOverlay.style.display = 'none';
-                levelSelectOverlay.style.display = 'none';
-                adOverlay.style.display = 'none';
-            }
-
-            // ==================== 广告系统 ====================
-            function showAd(title, subtitle, callback) {
-                if (adCountdownTimer) clearInterval(adCountdownTimer);
-                adCallback = callback;
-                adTitle.textContent = title || '广告播放中...';
-                adSubtitle.textContent = subtitle || '请观看广告以获取奖励';
-                adCountdown.textContent = '5';
-                adProgressFill.style.width = '0%';
-                btnCloseAd.classList.remove('visible');
-                adOverlay.style.display = 'flex';
-                isPaused = true;
-                let count = 5;
-                adCountdownTimer = setInterval(() => {
-                    count--;
-                    adCountdown.textContent = count;
-                    adProgressFill.style.width = ((5-count)/5*100)+'%';
-                    if (count <= 0) {
-                        clearInterval(adCountdownTimer);
-                        adCountdownTimer = null;
-                        adCountdown.textContent = '0';
-                        adProgressFill.style.width = '100%';
-                        btnCloseAd.classList.add('visible');
-                        adTitle.textContent = '广告即将结束';
-                        adSubtitle.textContent = '点击下方按钮关闭广告并领取奖励';
-                    }
-                }, 1000);
-            }
-            function closeAd() {
-                if (adCountdownTimer) { clearInterval(adCountdownTimer); adCountdownTimer = null; }
-                adOverlay.style.display = 'none';
-                isPaused = false;
-                if (adCallback) { const cb = adCallback; adCallback = null; cb(); }
-            }
-            btnCloseAd.addEventListener('click', () => { if (btnCloseAd.classList.contains('visible')) closeAd(); });
-
-            // ==================== 提示系统（双倍道具） ====================
-            function updateHintAvailability() {
-                const totalAllowed = MAX_HINTS + doubleHintCount;
-                btnHint.disabled = hintUsedCount >= totalAllowed;
-            }
-            btnHint.addEventListener('click', () => {
-                if (!isGameActive || isPaused) return;
-                if (lives <= 0) { showToast('💔 生命不足，无法使用提示', 1500); return; }
-                const level = getCurrentLevel();
-                const unfound = level.hiddenWords.filter(w => !foundSet.has(w));
-                if (unfound.length === 0) { showToast('所有隐藏字都已找到！', 1500); return; }
-                const totalAllowed = MAX_HINTS + doubleHintCount;
-                if (hintUsedCount >= totalAllowed) { showToast('提示次数已用完', 1800); return; }
-                showAd('💡 观看广告获取提示', '广告结束后将自动解锁一个隐藏字', () => {
-                    const stillUnfound = level.hiddenWords.filter(w => !foundSet.has(w));
-                    if (stillUnfound.length > 0) {
-                        const pick = stillUnfound[Math.floor(Math.random() * stillUnfound.length)];
-                        foundSet.add(pick);
-                        updateFoundCellsDisplay();
-                        const chips = candidateChips.querySelectorAll('.candidate-chip');
-                        chips.forEach(ch => { if(ch.dataset.word === pick) ch.classList.add('found'); });
-                        hintUsedCount++;
-                        if (doubleHintCount > 0 && hintUsedCount <= MAX_HINTS + doubleHintCount) {
-                            const nextUnfound = level.hiddenWords.filter(w => !foundSet.has(w));
-                            if (nextUnfound.length > 0) {
-                                const second = nextUnfound[Math.floor(Math.random() * nextUnfound.length)];
-                                foundSet.add(second);
-                                updateFoundCellsDisplay();
-                                const chips2 = candidateChips.querySelectorAll('.candidate-chip');
-                                chips2.forEach(ch => { if(ch.dataset.word === second) ch.classList.add('found'); });
-                                hintUsedCount++;
-                                doubleHintCount--;
-                                saveProgress();
-                                showToast('💡 双倍提示！额外解锁「' + second + '」', 2000);
-                            }
-                        }
-                        showToast('💡 已解锁「' + pick + '」', 1800);
-                        totalScore += 5;
-                        updateScoreDisplay();
-                        saveProgress();
-                        updateHintAvailability();
-                        if (foundSet.size >= level.hiddenWords.length) handleWin();
-                    }
-                });
-            });
-
-            // ==================== 每日挑战 ====================
-            const DAILY_KEY = 'hanzi_daily_challenge';
-            function getTodayStr() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
-            function loadDailyData() {
-                try { const raw = localStorage.getItem(DAILY_KEY); if (raw) { const data = JSON.parse(raw); if (data.date === getTodayStr()) return data; } } catch(e) {}
-                return null;
-            }
-            function saveDailyData(data) { localStorage.setItem(DAILY_KEY, JSON.stringify(data)); }
-            function generateDailyChallenge() {
-                const easyPool = levelData.filter(l => l.difficulty <= 2);
-                const mediumPool = levelData.filter(l => l.difficulty >= 3 && l.difficulty <= 4);
-                const hardPool = levelData.filter(l => l.difficulty >= 5);
-                if (easyPool.length === 0 || mediumPool.length === 0 || hardPool.length === 0) { showToast('关卡不足，无法生成每日挑战', 3000); return null; }
-                const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
-                const challenges = [
-                    { type: '简单', levelId: pickRandom(easyPool).id },
-                    { type: '中等', levelId: pickRandom(mediumPool).id },
-                    { type: '地狱', levelId: pickRandom(hardPool).id }
-                ];
-                const data = { date: getTodayStr(), challenges, completed: [false, false, false] };
-                saveDailyData(data);
-                return data;
-            }
-            function getDailyData() { let data = loadDailyData(); if (!data) data = generateDailyChallenge(); return data; }
-            function completeDailyChallenge(index) {
-                const data = loadDailyData(); if (!data || data.date !== getTodayStr()) return false;
-                data.completed[index] = true;
-                saveDailyData(data);
-                if (data.completed.every(v => v)) {
-                    doubleHintCount += 2;
-                    saveProgress();
-                    updateHintAvailability();
-                    showToast('🎉 完成全部每日挑战！获得双倍提示道具x2！', 3500);
-                }
-                return true;
-            }
-            window.startDailyLevel = function(index) {
-                const data = loadDailyData(); if (!data) return;
-                const levelId = data.challenges[index].levelId;
-                const levelIndex = levelData.findIndex(l => l.id === levelId);
-                if (levelIndex >= 0) {
-                    document.getElementById('dailyOverlay')?.remove();
-                    loadLevel(levelIndex);
-                    window._dailyChallengeIndex = index;
-                }
-            };
-            btnDaily.addEventListener('click', () => {
-                if (isGameActive && !isPaused) isPaused = true;
-                const data = getDailyData(); if (!data) return;
-                let html = `<h3>📅 每日挑战 (${data.date})</h3><div style="display:flex; flex-direction:column; gap:12px;">`;
-                data.challenges.forEach((ch, idx) => {
-                    const level = levelData.find(l => l.id === ch.levelId);
-                    const completed = data.completed[idx];
-                    html += `<div style="display:flex; align-items:center; justify-content:space-between; padding:10px; background:#fef9f0; border-radius:12px;">
-                        <span>${ch.type}：<b>${level.character}</b> (第${level.id}关)</span>
-                        <button class="btn" ${completed ? 'disabled' : ''} onclick="startDailyLevel(${idx})">${completed ? '已完成' : '挑战'}</button>
-                    </div>`;
-                });
-                html += `<button class="btn" style="margin-top:12px;" onclick="document.getElementById('dailyOverlay').remove(); if(window.isPaused) isPaused=false;">关闭</button>`;
-                let overlay = document.createElement('div'); overlay.id = 'dailyOverlay'; overlay.className = 'level-select-overlay';
-                overlay.innerHTML = `<div class="level-select-modal" style="text-align:center;">${html}</div>`;
-                document.body.appendChild(overlay);
-                overlay.addEventListener('click', (e) => { if (e.target === overlay) { overlay.remove(); if (isPaused && isGameActive) isPaused = false; } });
-            });
-
-            // ==================== 结果弹窗与科普 ====================
-            function getCharDescription(character) {
-                const level = levelData.find(l => l.character === character);
-                if (level && level.description) return level.description;
-                return charDescriptions[character] || null;
-            }
-            function showResultModal(isWin) {
-                resultOverlay.style.display = 'flex';
-                const level = getCurrentLevel();
-                let extraHTML = '';
-                if (isWin) {
-    // 优先使用 level.js 中的 description，没有则回退到内置词典
-    const desc = level.description || charDescriptions[level.character];
-    if (desc) {
-        extraHTML += `<div style="background:#fef9e7; border-radius:12px; padding:12px; margin:12px 0; font-size:0.9rem; color:#5d4e37; text-align:left;">📖 <b>汉字科普：</b>${desc}</div>`;
+<script>
+(function() {
+    if (typeof levelData === 'undefined') {
+        alert('关卡数据加载失败，请检查 level.js 文件是否存在。');
+        return;
     }
-    // 显示造句（如果存在）
-    const sentence = level.sentence;
-    if (sentence) {
-        extraHTML += `<div style="background:#fef9e7; border-radius:12px; padding:12px; margin:12px 0; font-size:0.9rem; color:#5d4e37; text-align:left;">✏️ <b>造句：</b>${sentence}</div>`;
+
+    // ==================== 汉字释义库（备用） ====================
+    const charDescriptions = {
+        '大': '像一个张开双臂的人，表示大小的大。',
+        '天': '人头顶上方的天空，本义为头顶。',
+        '太': '大字下面加一点，表示过于、极。',
+        '木': '一棵树的样子，上为枝叶，下为根。',
+        '人': '侧面站立的人形。',
+        '从': '两人一前一后，表示跟从。',
+        '众': '三人为众，表示人多。',
+        '火': '火焰的形状。',
+        '灭': '火上加一横，表示用东西盖住火，即为灭。',
+        '口': '像一张嘴。',
+        '日': '太阳的形状。',
+        '月': '像一弯新月。',
+        '明': '日月组合，表示明亮。',
+        '林': '两棵树并排，表示树林。',
+        '森': '三木为森，表示森林。',
+        '休': '人靠在树旁休息。',
+        '好': '女子相伴，表示美好。',
+    };
+
+    // ==================== 游戏状态 ====================
+    let currentLevelIndex = 0;
+    let totalScore = 0;
+    let foundSet = new Set();
+    let timeLeft = CONFIG.totalTime;
+    let timerInterval = null;
+    let isGameActive = false;
+    // 全局暂停标志（供 ads.js 使用）
+    window.isPaused = false;
+    let hintUsedCount = 0;
+    let doubleHintCount = 0;
+    let reviveUsed = false;
+    let completedLevels = new Set();
+
+    // 生命值系统
+    let lives = CONFIG.maxLives;
+    let lastRecoveryTime = Date.now();
+    let recoveryTimerInterval = null;
+
+    // ==================== DOM 元素 ====================
+    const $ = (sel) => document.querySelector(sel);
+    const bigCharWrapper = $('#bigCharWrapper');
+    const bigCharCanvas = $('#bigCharCanvas');
+    const ctx = bigCharCanvas.getContext('2d');
+    const foundCells = $('#foundCells');
+    const candidateChips = $('#candidateChips');
+    const progressMini = $('#progressMini');
+    const timerDisplay = $('#timerDisplay');
+    const scoreDisplay = $('#scoreDisplay');
+    const levelBadge = $('#levelBadge');
+    const levelTitle = $('#levelTitle');
+    const btnHint = $('#btnHint');
+    const btnRevive = $('#btnRevive');
+    const btnDaily = $('#btnDaily');
+    const btnLevels = $('#btnLevels');
+    const resultOverlay = $('#resultOverlay');
+    const resultModal = $('#resultModal');
+    const levelSelectOverlay = $('#levelSelectOverlay');
+    const levelGrid = $('#levelGrid');
+    const btnCloseLevelSelect = $('#btnCloseLevelSelect');
+    const toastContainer = $('#toastContainer');
+    const livesCount = $('#livesCount');
+    const recoveryTimer = $('#recoveryTimer');
+
+    // ==================== 音效 ====================
+    let audioCtx = null;
+    function getAudioCtx() { if (!audioCtx) try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} return audioCtx; }
+    function playBeep(freq, duration, type='sine', vol=0.15) {
+        const ctx = getAudioCtx(); if(!ctx) return;
+        try {
+            const osc = ctx.createOscillator(); const gain = ctx.createGain();
+            osc.type = type; osc.frequency.value = freq;
+            gain.gain.setValueAtTime(vol, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.start(ctx.currentTime); osc.stop(ctx.currentTime + duration);
+        } catch(e) {}
     }
-}
-                if (isWin) {
-                    resultModal.innerHTML = `
-                        <div class="result-icon">🎉</div>
-                        <div class="result-title" style="color:#4caf50;">恭喜通关！</div>
-                        <div class="result-subtitle">你成功找出了「${level.character}」中所有的隐藏字</div>
-                        <div class="result-score">🪙 通关奖励 +100分 | 总分：${totalScore}</div>
-                        ${extraHTML}
-                        <div class="result-buttons">
-                            ${currentLevelIndex < levelData.length - 1 ? '<button class="btn-result btn-next" id="btnNextLevel">▶ 下一关</button>' : '<button class="btn-result btn-next" style="background:#gold;color:#3e2f1c;">🏆 全部通关！</button>'}
-                            <button class="btn-result btn-retry" id="btnRetryLevel">🔄 重玩本关</button>
-                            <button class="btn-result btn-quit" id="btnQuitResult">📂 关卡选择</button>
-                        </div>`;
-                } else {
-                    resultModal.innerHTML = `
-                        <div class="result-icon">⏰</div>
-                        <div class="result-title" style="color:#e74c3c;">时间到！</div>
-                        <div class="result-subtitle">「${level.character}」还剩 ${level.hiddenWords.length - foundSet.size} 个隐藏字未找到</div>
-                        <div class="result-score">已找到：${foundSet.size} / ${level.hiddenWords.length}</div>
-                        <div class="result-buttons">
-                            ${!reviveUsed ? '<button class="btn-result btn-ad" id="btnReviveTime">📺 看广告加时30秒</button>' : '<span style="color:#999;font-size:0.85rem;">本关已使用过复活</span>'}
-                            <button class="btn-result btn-retry" id="btnRetryLevel">🔄 重新挑战</button>
-                            <button class="btn-result btn-quit" id="btnQuitResult">📂 关卡选择</button>
-                        </div>`;
-                }
-                setTimeout(() => {
-                    const btnNext = $('#btnNextLevel'); const btnRetry = $('#btnRetryLevel'); const btnQuit = $('#btnQuitResult'); const btnReviveTime = $('#btnReviveTime');
-                    if (btnNext) btnNext.addEventListener('click', () => { resultOverlay.style.display = 'none'; if (currentLevelIndex < levelData.length - 1) loadLevel(currentLevelIndex + 1); else { showToast('🏆 恭喜！你已通关全部关卡！', 3000); loadLevel(0); } });
-                    if (btnRetry) btnRetry.addEventListener('click', () => { resultOverlay.style.display = 'none'; loadLevel(currentLevelIndex); });
-                    if (btnQuit) btnQuit.addEventListener('click', () => { resultOverlay.style.display = 'none'; openLevelSelect(); });
-                    if (btnReviveTime) btnReviveTime.addEventListener('click', () => { resultOverlay.style.display = 'none'; showAd('📺 观看广告获得加时', '广告结束后增加30秒继续挑战', () => { timeLeft += BONUS_TIME; reviveUsed = true; isGameActive = true; isPaused = false; updateTimerDisplay(); timerDisplay.classList.remove('warning'); startTimer(); showToast('⏱ +30秒！继续加油！', 2000); }); });
-                }, 100);
-            }
+    function sfxCorrect() { playBeep(880,0.12); playBeep(1100,0.1); }
+    function sfxWrong() { playBeep(180,0.25,'triangle',0.2); }
+    function sfxWin() { playBeep(660,0.12); setTimeout(()=>playBeep(880,0.12),120); setTimeout(()=>playBeep(1100,0.18),240); }
+    function sfxTick() { playBeep(440,0.06,'square',0.08); }
 
-            // ==================== 关卡选择 ====================
-            function openLevelSelect() { levelSelectOverlay.style.display = 'flex'; renderLevelGrid(); }
-            function renderLevelGrid() {
-                levelGrid.innerHTML = '';
-                levelData.forEach((lv, idx) => {
-                    const cell = document.createElement('div'); cell.className = 'level-cell';
-                    if (completedLevels.has(idx)) cell.classList.add('completed');
-                    if (idx === currentLevelIndex && !completedLevels.has(idx)) cell.classList.add('current');
-                    const isUnlocked = idx === 0 || completedLevels.has(idx-1) || completedLevels.has(idx);
-                    if (!isUnlocked && idx > 0) cell.classList.add('locked');
-                    cell.innerHTML = `<span class="level-num">${lv.id}</span><span class="level-char">${lv.character}</span><span class="level-stars">${'★'.repeat(lv.difficulty)}</span>`;
-                    cell.addEventListener('click', () => { if (cell.classList.contains('locked')) return; levelSelectOverlay.style.display = 'none'; loadLevel(idx); });
-                    levelGrid.appendChild(cell);
-                });
-            }
-            btnLevels.addEventListener('click', () => { if (isGameActive && !isPaused) isPaused = true; openLevelSelect(); });
-            btnCloseLevelSelect.addEventListener('click', () => { levelSelectOverlay.style.display = 'none'; if (isPaused && isGameActive) isPaused = false; });
-            levelSelectOverlay.addEventListener('click', (e) => { if (e.target === levelSelectOverlay) { levelSelectOverlay.style.display = 'none'; if (isPaused && isGameActive) isPaused = false; } });
-            resultOverlay.addEventListener('click', (e) => { if (e.target === resultOverlay) resultOverlay.style.display = 'none'; });
+    // ==================== Toast 通知 ====================
+    function showToast(msg, duration=2000) {
+        const el = document.createElement('div'); el.className='toast'; el.textContent=msg;
+        toastContainer.appendChild(el);
+        setTimeout(()=>{ if(el.parentNode) el.remove(); }, duration+500);
+    }
 
-            // ==================== 按钮事件 ====================
-            btnRevive.addEventListener('click', reviveLife);
-
-            // ==================== 窗口事件 ====================
-            window.addEventListener('resize', () => setTimeout(redrawCanvas, 250));
-            window.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    if (adOverlay.style.display === 'flex' && btnCloseAd.classList.contains('visible')) closeAd();
-                    else if (levelSelectOverlay.style.display === 'flex') { levelSelectOverlay.style.display = 'none'; if (isPaused && isGameActive) isPaused = false; }
-                    else if (resultOverlay.style.display === 'flex') resultOverlay.style.display = 'none';
-                }
-            });
-
-            // ==================== 初始化 ====================
-            function init() {
-                loadProgress();
-                if (currentLevelIndex >= levelData.length) currentLevelIndex = 0;
+    // ==================== 持久化存储 ====================
+    function saveProgress() {
+        try {
+            const data = { totalScore, completedLevels: Array.from(completedLevels), currentLevelIndex, lives, lastRecoveryTime, doubleHintCount };
+            localStorage.setItem('hanzi_game_progress', JSON.stringify(data));
+        } catch(e) {}
+    }
+    function loadProgress() {
+        try {
+            const raw = localStorage.getItem('hanzi_game_progress');
+            if (raw) {
+                const data = JSON.parse(raw);
+                totalScore = data.totalScore || 0;
+                completedLevels = new Set(data.completedLevels || []);
+                currentLevelIndex = data.currentLevelIndex || 0;
+                lives = data.lives != null ? data.lives : CONFIG.maxLives;
+                lastRecoveryTime = data.lastRecoveryTime || Date.now();
+                doubleHintCount = data.doubleHintCount || 0;
+                if (currentLevelIndex >= levelData.length) currentLevelIndex = levelData.length - 1;
                 if (currentLevelIndex < 0) currentLevelIndex = 0;
-                updateScoreDisplay();
-                updateLivesAndRecoveryDisplay();
-                startRecoveryTimer();
-                updateHintAvailability();
-                loadLevel(currentLevelIndex);
-                setTimeout(redrawCanvas, 200);
             }
-            init();
-            console.log('🀄 汉字拆字大师 - 生命值+每日挑战+扣分机制已启动');
-        })();
-    </script>
+        } catch(e) {}
+    }
+
+    // ==================== 生命值与恢复倒计时 ====================
+    function updateLivesAndRecoveryDisplay() {
+        livesCount.textContent = lives;
+        btnRevive.style.display = (lives < CONFIG.maxLives) ? 'inline-flex' : 'none';
+        const now = Date.now();
+        const nextRecovery = lastRecoveryTime + CONFIG.recoveryInterval;
+        const remaining = Math.max(0, Math.ceil((nextRecovery - now) / 1000));
+        if (lives >= CONFIG.maxLives) {
+            recoveryTimer.textContent = '';
+            return;
+        }
+        const mins = Math.floor(remaining / 60);
+        const secs = remaining % 60;
+        recoveryTimer.textContent = `恢复 ${mins}:${secs.toString().padStart(2,'0')}`;
+        if (remaining <= 0) {
+            lives = Math.min(lives + 1, CONFIG.maxLives);
+            lastRecoveryTime = now;
+            showToast('❤️ 自动恢复1条命', 2000);
+            saveProgress();
+            updateLivesAndRecoveryDisplay();
+        }
+    }
+    function resetRecoveryTimer() {
+        lastRecoveryTime = Date.now();
+        updateLivesAndRecoveryDisplay();
+        saveProgress();
+    }
+    function startRecoveryTimer() {
+        if (recoveryTimerInterval) clearInterval(recoveryTimerInterval);
+        recoveryTimerInterval = setInterval(updateLivesAndRecoveryDisplay, 500);
+    }
+    function loseLife() {
+        if (lives > 0) {
+            lives--;
+            if (lives < CONFIG.maxLives) resetRecoveryTimer();
+            updateLivesAndRecoveryDisplay();
+            saveProgress();
+            if (lives === 0) showToast('💔 生命耗尽！看广告续命或等待5分钟恢复', 3000);
+        }
+    }
+    function reviveLife() {
+        if (lives >= CONFIG.maxLives) return;
+        AdManager.showRewardedAd('📺 观看广告续命', '广告结束后将恢复1条命', () => {
+            lives = Math.min(lives + 1, CONFIG.maxLives);
+            resetRecoveryTimer();
+            updateLivesAndRecoveryDisplay();
+            saveProgress();
+            showToast('❤️ +1条命！', 1500);
+        });
+    }
+
+    // ==================== Canvas 绘制 ====================
+    function drawBigChar(character) {
+        const rect = bigCharWrapper.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        const w = rect.width, h = rect.height;
+        if (w<=0||h<=0) return;
+        bigCharCanvas.width = w*dpr; bigCharCanvas.height = h*dpr;
+        bigCharCanvas.style.width = w+'px'; bigCharCanvas.style.height = h+'px';
+        ctx.setTransform(1,0,0,1,0,0); ctx.scale(dpr,dpr);
+        ctx.fillStyle='#fffef9'; ctx.fillRect(0,0,w,h);
+        const cx=w/2, cy=h/2, margin=w*0.12;
+        ctx.strokeStyle='rgba(180,150,110,0.35)'; ctx.lineWidth=1.2;
+        ctx.setLineDash([6,4]);
+        ctx.beginPath(); ctx.moveTo(margin,cy); ctx.lineTo(w-margin,cy); ctx.moveTo(cx,margin); ctx.lineTo(cx,h-margin); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.strokeStyle='rgba(180,150,110,0.55)'; ctx.lineWidth=2.5; ctx.strokeRect(margin,margin,w-2*margin,h-2*margin);
+        const fontSize = Math.min(w,h)*0.58;
+        ctx.fillStyle='#3e2f1c'; ctx.font=`700 ${fontSize}px "STKaiti","KaiTi","楷体","Noto Serif SC","Songti SC","宋体",serif`;
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(character, cx, cy);
+        ctx.fillStyle='rgba(0,0,0,0.04)'; ctx.fillText(character, cx+1.5, cy+2);
+        ctx.fillStyle='#3e2f1c'; ctx.fillText(character, cx, cy);
+    }
+    function redrawCanvas() { const level = levelData[currentLevelIndex]; if(level) drawBigChar(level.character); }
+
+    // ==================== 游戏核心逻辑 ====================
+    function getCurrentLevel() { return levelData[currentLevelIndex]; }
+    function shuffleArray(arr) { const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+    function buildCandidateList() {
+        const level = getCurrentLevel();
+        return shuffleArray([...new Set([...level.hiddenWords, ...level.distractors])]);
+    }
+
+    function renderFoundCells() {
+        const level = getCurrentLevel();
+        foundCells.innerHTML = '';
+        for(let i=0; i<level.hiddenWords.length; i++) {
+            const cell = document.createElement('div'); cell.className='found-cell'; foundCells.appendChild(cell);
+        }
+        updateFoundCellsDisplay();
+        progressMini.textContent = `0 / ${level.hiddenWords.length}`;
+    }
+    function updateFoundCellsDisplay() {
+        const level = getCurrentLevel();
+        const cells = foundCells.querySelectorAll('.found-cell');
+        const foundArr = Array.from(foundSet);
+        cells.forEach((cell,i) => {
+            if(i < foundArr.length) { cell.textContent = foundArr[i]; cell.classList.add('filled'); }
+            else { cell.textContent = ''; cell.classList.remove('filled'); }
+        });
+        progressMini.textContent = `${foundArr.length} / ${level.hiddenWords.length}`;
+    }
+    function renderCandidateChips(candidates) {
+        candidateChips.innerHTML = '';
+        candidates.forEach(word => {
+            const chip = document.createElement('button');
+            chip.className = 'candidate-chip';
+            chip.textContent = word;
+            chip.dataset.word = word;
+            if(foundSet.has(word)) chip.classList.add('found');
+            chip.addEventListener('click', () => handleChipClick(chip, word));
+            candidateChips.appendChild(chip);
+        });
+    }
+
+    function handleChipClick(chip, word) {
+        if (!isGameActive || window.isPaused) return;
+        if (lives <= 0) { showToast('💔 生命不足，请续命后再作答', 2000); return; }
+        const level = getCurrentLevel();
+        if (foundSet.has(word)) return;
+        if (level.hiddenWords.includes(word)) {
+            foundSet.add(word);
+            chip.classList.add('found');
+            updateFoundCellsDisplay();
+            sfxCorrect();
+            totalScore += CONFIG.scorePerFound;
+            updateScoreDisplay();
+            saveProgress();
+            showToast('✅ 找到了「' + word + '」！+10分', 1500);
+            if (foundSet.size >= level.hiddenWords.length) handleWin();
+        } else {
+            chip.classList.add('wrong-flash');
+            sfxWrong();
+            timeLeft = Math.max(0, timeLeft - CONFIG.timePenaltyWrong);
+            totalScore = Math.max(0, totalScore - CONFIG.scorePenaltyWrong);
+            updateTimerDisplay();
+            updateScoreDisplay();
+            loseLife();
+            showToast(`❌ 错！-${CONFIG.timePenaltyWrong}秒 -${CONFIG.scorePenaltyWrong}分 (生命-1)`, 2000);
+            setTimeout(() => chip.classList.remove('wrong-flash'), 500);
+        }
+    }
+
+    function handleWin() {
+        clearInterval(timerInterval);
+        isGameActive = false;
+        totalScore += CONFIG.scoreBonusWin;
+        updateScoreDisplay();
+        completedLevels.add(currentLevelIndex);
+        saveProgress();
+        sfxWin();
+        if (typeof window._dailyChallengeIndex !== 'undefined') {
+            completeDailyChallenge(window._dailyChallengeIndex);
+            delete window._dailyChallengeIndex;
+        }
+        showResultModal(true);
+    }
+    function handleTimeUp() {
+        clearInterval(timerInterval);
+        isGameActive = false;
+        showResultModal(false);
+    }
+    function updateTimerDisplay() {
+        const mins = Math.floor(timeLeft/60);
+        const secs = timeLeft%60;
+        timerDisplay.textContent = `⏱ ${mins}:${secs.toString().padStart(2,'0')}`;
+        timerDisplay.classList.toggle('warning', timeLeft <= 15);
+    }
+    function updateScoreDisplay() { scoreDisplay.textContent = totalScore; }
+    function startTimer() {
+        clearInterval(timerInterval);
+        updateTimerDisplay();
+        timerInterval = setInterval(() => {
+            if (window.isPaused) return;
+            timeLeft--;
+            updateTimerDisplay();
+            if (timeLeft <= 15 && timeLeft > 0) sfxTick();
+            if (timeLeft <= 0) handleTimeUp();
+        }, 1000);
+    }
+    function resetGameState() {
+        clearInterval(timerInterval);
+        foundSet.clear();
+        timeLeft = CONFIG.totalTime;
+        isGameActive = true;
+        window.isPaused = false;
+        hintUsedCount = 0;
+        reviveUsed = false;
+        updateTimerDisplay();
+        timerDisplay.classList.remove('warning');
+        updateScoreDisplay();
+        btnHint.disabled = false;
+        updateHintAvailability();
+    }
+    function loadLevel(index) {
+        if (index < 0 || index >= levelData.length) return;
+        currentLevelIndex = index;
+        resetGameState();
+        const level = getCurrentLevel();
+        levelBadge.textContent = `第${level.id}关`;
+        levelTitle.textContent = '★'.repeat(level.difficulty) + '☆'.repeat(5-level.difficulty);
+        renderFoundCells();
+        renderCandidateChips(buildCandidateList());
+        redrawCanvas();
+        startTimer();
+        updateScoreDisplay();
+        updateLivesAndRecoveryDisplay();
+        saveProgress();
+        resultOverlay.style.display = 'none';
+        levelSelectOverlay.style.display = 'none';
+        if (document.getElementById('adOverlay')) document.getElementById('adOverlay').style.display = 'none';
+    }
+
+    // ==================== 提示系统（双倍道具） ====================
+    function updateHintAvailability() {
+        const totalAllowed = CONFIG.maxHints + doubleHintCount;
+        btnHint.disabled = hintUsedCount >= totalAllowed;
+    }
+    btnHint.addEventListener('click', () => {
+        if (!isGameActive || window.isPaused) return;
+        if (lives <= 0) { showToast('💔 生命不足，无法使用提示', 1500); return; }
+        const level = getCurrentLevel();
+        const unfound = level.hiddenWords.filter(w => !foundSet.has(w));
+        if (unfound.length === 0) { showToast('所有隐藏字都已找到！', 1500); return; }
+        const totalAllowed = CONFIG.maxHints + doubleHintCount;
+        if (hintUsedCount >= totalAllowed) { showToast('提示次数已用完', 1800); return; }
+        AdManager.showRewardedAd('💡 观看广告获取提示', '广告结束后将自动解锁一个隐藏字', () => {
+            const stillUnfound = level.hiddenWords.filter(w => !foundSet.has(w));
+            if (stillUnfound.length > 0) {
+                const pick = stillUnfound[Math.floor(Math.random() * stillUnfound.length)];
+                foundSet.add(pick);
+                updateFoundCellsDisplay();
+                const chips = candidateChips.querySelectorAll('.candidate-chip');
+                chips.forEach(ch => { if(ch.dataset.word === pick) ch.classList.add('found'); });
+                hintUsedCount++;
+                if (doubleHintCount > 0 && hintUsedCount <= CONFIG.maxHints + doubleHintCount) {
+                    const nextUnfound = level.hiddenWords.filter(w => !foundSet.has(w));
+                    if (nextUnfound.length > 0) {
+                        const second = nextUnfound[Math.floor(Math.random() * nextUnfound.length)];
+                        foundSet.add(second);
+                        updateFoundCellsDisplay();
+                        const chips2 = candidateChips.querySelectorAll('.candidate-chip');
+                        chips2.forEach(ch => { if(ch.dataset.word === second) ch.classList.add('found'); });
+                        hintUsedCount++;
+                        doubleHintCount--;
+                        saveProgress();
+                        showToast('💡 双倍提示！额外解锁「' + second + '」', 2000);
+                    }
+                }
+                showToast('💡 已解锁「' + pick + '」', 1800);
+                totalScore += CONFIG.scorePerHint;
+                updateScoreDisplay();
+                saveProgress();
+                updateHintAvailability();
+                if (foundSet.size >= level.hiddenWords.length) handleWin();
+            }
+        });
+    });
+
+    // ==================== 每日挑战（不变） ====================
+    const DAILY_KEY = 'hanzi_daily_challenge';
+    function getTodayStr() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+    function loadDailyData() {
+        try { const raw = localStorage.getItem(DAILY_KEY); if (raw) { const data = JSON.parse(raw); if (data.date === getTodayStr()) return data; } } catch(e) {}
+        return null;
+    }
+    function saveDailyData(data) { localStorage.setItem(DAILY_KEY, JSON.stringify(data)); }
+    function generateDailyChallenge() {
+        const easyPool = levelData.filter(l => l.difficulty <= 2);
+        const mediumPool = levelData.filter(l => l.difficulty >= 3 && l.difficulty <= 4);
+        const hardPool = levelData.filter(l => l.difficulty >= 5);
+        if (easyPool.length === 0 || mediumPool.length === 0 || hardPool.length === 0) { showToast('关卡不足，无法生成每日挑战', 3000); return null; }
+        const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+        const challenges = [
+            { type: '简单', levelId: pickRandom(easyPool).id },
+            { type: '中等', levelId: pickRandom(mediumPool).id },
+            { type: '地狱', levelId: pickRandom(hardPool).id }
+        ];
+        const data = { date: getTodayStr(), challenges, completed: [false, false, false] };
+        saveDailyData(data);
+        return data;
+    }
+    function getDailyData() { let data = loadDailyData(); if (!data) data = generateDailyChallenge(); return data; }
+    function completeDailyChallenge(index) {
+        const data = loadDailyData(); if (!data || data.date !== getTodayStr()) return false;
+        data.completed[index] = true;
+        saveDailyData(data);
+        if (data.completed.every(v => v)) {
+            doubleHintCount += 2;
+            saveProgress();
+            updateHintAvailability();
+            showToast('🎉 完成全部每日挑战！获得双倍提示道具x2！', 3500);
+        }
+        return true;
+    }
+    window.startDailyLevel = function(index) {
+        const data = loadDailyData(); if (!data) return;
+        const levelId = data.challenges[index].levelId;
+        const levelIndex = levelData.findIndex(l => l.id === levelId);
+        if (levelIndex >= 0) {
+            document.getElementById('dailyOverlay')?.remove();
+            loadLevel(levelIndex);
+            window._dailyChallengeIndex = index;
+        }
+    };
+    btnDaily.addEventListener('click', () => {
+        if (isGameActive && !window.isPaused) window.isPaused = true;
+        const data = getDailyData(); if (!data) return;
+        let html = `<h3>📅 每日挑战 (${data.date})</h3><div style="display:flex; flex-direction:column; gap:12px;">`;
+        data.challenges.forEach((ch, idx) => {
+            const level = levelData.find(l => l.id === ch.levelId);
+            const completed = data.completed[idx];
+            html += `<div style="display:flex; align-items:center; justify-content:space-between; padding:10px; background:#fef9f0; border-radius:12px;">
+                <span>${ch.type}：<b>${level.character}</b> (第${level.id}关)</span>
+                <button class="btn" ${completed ? 'disabled' : ''} onclick="startDailyLevel(${idx})">${completed ? '已完成' : '挑战'}</button>
+            </div>`;
+        });
+        html += `<button class="btn" style="margin-top:12px;" onclick="document.getElementById('dailyOverlay').remove(); if(window.isPaused) isPaused=false;">关闭</button>`;
+        let overlay = document.createElement('div'); overlay.id = 'dailyOverlay'; overlay.className = 'level-select-overlay';
+        overlay.innerHTML = `<div class="level-select-modal" style="text-align:center;">${html}</div>`;
+        document.body.appendChild(overlay);
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) { overlay.remove(); if (window.isPaused && isGameActive) window.isPaused = false; } });
+    });
+
+    // ==================== 结果弹窗与科普 ====================
+    function getCharDescription(character) {
+        const level = levelData.find(l => l.character === character);
+        if (level && level.description) return level.description;
+        return charDescriptions[character] || null;
+    }
+    function showResultModal(isWin) {
+        resultOverlay.style.display = 'flex';
+        const level = getCurrentLevel();
+        let extraHTML = '';
+        if (isWin) {
+            const desc = level.description || charDescriptions[level.character];
+            if (desc) extraHTML += `<div style="background:#fef9e7; border-radius:12px; padding:12px; margin:12px 0; font-size:0.9rem; color:#5d4e37; text-align:left;">📖 <b>汉字科普：</b>${desc}</div>`;
+            const sentence = level.sentence;
+            if (sentence) extraHTML += `<div style="background:#fef9e7; border-radius:12px; padding:12px; margin:12px 0; font-size:0.9rem; color:#5d4e37; text-align:left;">✏️ <b>造句：</b>${sentence}</div>`;
+
+            resultModal.innerHTML = `
+                <div class="result-icon">🎉</div>
+                <div class="result-title" style="color:#4caf50;">恭喜通关！</div>
+                <div class="result-subtitle">你成功找出了「${level.character}」中所有的隐藏字</div>
+                <div class="result-score">🪙 通关奖励 +100分 | 总分：${totalScore}</div>
+                ${extraHTML}
+                <div class="result-buttons">
+                    ${currentLevelIndex < levelData.length - 1 ? '<button class="btn-result btn-next" id="btnNextLevel">▶ 下一关</button>' : '<button class="btn-result btn-next" style="background:#gold;color:#3e2f1c;">🏆 全部通关！</button>'}
+                    <button class="btn-result btn-retry" id="btnRetryLevel">🔄 重玩本关</button>
+                    <button class="btn-result btn-quit" id="btnQuitResult">📂 关卡选择</button>
+                </div>`;
+        } else {
+            resultModal.innerHTML = `
+                <div class="result-icon">⏰</div>
+                <div class="result-title" style="color:#e74c3c;">时间到！</div>
+                <div class="result-subtitle">「${level.character}」还剩 ${level.hiddenWords.length - foundSet.size} 个隐藏字未找到</div>
+                <div class="result-score">已找到：${foundSet.size} / ${level.hiddenWords.length}</div>
+                <div class="result-buttons">
+                    ${!reviveUsed ? '<button class="btn-result btn-ad" id="btnReviveTime">📺 看广告加时30秒</button>' : '<span style="color:#999;font-size:0.85rem;">本关已使用过复活</span>'}
+                    <button class="btn-result btn-retry" id="btnRetryLevel">🔄 重新挑战</button>
+                    <button class="btn-result btn-quit" id="btnQuitResult">📂 关卡选择</button>
+                </div>`;
+        }
+        setTimeout(() => {
+            const btnNext = $('#btnNextLevel'); const btnRetry = $('#btnRetryLevel'); const btnQuit = $('#btnQuitResult'); const btnReviveTime = $('#btnReviveTime');
+            if (btnNext) btnNext.addEventListener('click', () => { resultOverlay.style.display = 'none'; if (currentLevelIndex < levelData.length - 1) loadLevel(currentLevelIndex + 1); else { showToast('🏆 恭喜！你已通关全部关卡！', 3000); loadLevel(0); } });
+            if (btnRetry) btnRetry.addEventListener('click', () => { resultOverlay.style.display = 'none'; loadLevel(currentLevelIndex); });
+            if (btnQuit) btnQuit.addEventListener('click', () => { resultOverlay.style.display = 'none'; openLevelSelect(); });
+            if (btnReviveTime) btnReviveTime.addEventListener('click', () => {
+                resultOverlay.style.display = 'none';
+                AdManager.showRewardedAd('📺 观看广告获得加时', '广告结束后增加30秒继续挑战', () => {
+                    timeLeft += CONFIG.bonusTime;
+                    reviveUsed = true;
+                    isGameActive = true;
+                    window.isPaused = false;
+                    updateTimerDisplay();
+                    timerDisplay.classList.remove('warning');
+                    startTimer();
+                    showToast('⏱ +30秒！继续加油！', 2000);
+                });
+            });
+        }, 100);
+    }
+
+    // ==================== 关卡选择 ====================
+    function openLevelSelect() { levelSelectOverlay.style.display = 'flex'; renderLevelGrid(); }
+    function renderLevelGrid() {
+        levelGrid.innerHTML = '';
+        levelData.forEach((lv, idx) => {
+            const cell = document.createElement('div'); cell.className = 'level-cell';
+            if (completedLevels.has(idx)) cell.classList.add('completed');
+            if (idx === currentLevelIndex && !completedLevels.has(idx)) cell.classList.add('current');
+            const isUnlocked = idx === 0 || completedLevels.has(idx-1) || completedLevels.has(idx);
+            if (!isUnlocked && idx > 0) cell.classList.add('locked');
+            cell.innerHTML = `<span class="level-num">${lv.id}</span><span class="level-char">${lv.character}</span><span class="level-stars">${'★'.repeat(lv.difficulty)}</span>`;
+            cell.addEventListener('click', () => { if (cell.classList.contains('locked')) return; levelSelectOverlay.style.display = 'none'; loadLevel(idx); });
+            levelGrid.appendChild(cell);
+        });
+    }
+    btnLevels.addEventListener('click', () => { if (isGameActive && !window.isPaused) window.isPaused = true; openLevelSelect(); });
+    btnCloseLevelSelect.addEventListener('click', () => { levelSelectOverlay.style.display = 'none'; if (window.isPaused && isGameActive) window.isPaused = false; });
+    levelSelectOverlay.addEventListener('click', (e) => { if (e.target === levelSelectOverlay) { levelSelectOverlay.style.display = 'none'; if (window.isPaused && isGameActive) window.isPaused = false; } });
+    resultOverlay.addEventListener('click', (e) => { if (e.target === resultOverlay) resultOverlay.style.display = 'none'; });
+
+    // ==================== 按钮事件 ====================
+    btnRevive.addEventListener('click', reviveLife);
+
+    // ==================== 窗口事件 ====================
+    window.addEventListener('resize', () => setTimeout(redrawCanvas, 250));
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const adOverlayEl = document.getElementById('adOverlay');
+            const btnCloseAdEl = document.getElementById('btnCloseAd');
+            if (adOverlayEl && adOverlayEl.style.display === 'flex' && btnCloseAdEl && btnCloseAdEl.classList.contains('visible')) {
+                // 调用 ads.js 中的关闭逻辑（触发 click）
+                btnCloseAdEl.click();
+            }
+            else if (levelSelectOverlay.style.display === 'flex') { levelSelectOverlay.style.display = 'none'; if (window.isPaused && isGameActive) window.isPaused = false; }
+            else if (resultOverlay.style.display === 'flex') resultOverlay.style.display = 'none';
+        }
+    });
+
+    // ==================== 初始化 ====================
+    function init() {
+        loadProgress();
+        if (currentLevelIndex >= levelData.length) currentLevelIndex = 0;
+        if (currentLevelIndex < 0) currentLevelIndex = 0;
+        updateScoreDisplay();
+        updateLivesAndRecoveryDisplay();
+        startRecoveryTimer();
+        updateHintAvailability();
+        loadLevel(currentLevelIndex);
+        setTimeout(redrawCanvas, 200);
+    }
+    init();
+    console.log('🀄 汉字拆字大师 - 生命值+每日挑战+扣分机制已启动');
+})();
+</script>
 </body>
 </html>
