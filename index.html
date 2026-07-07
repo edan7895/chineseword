@@ -320,7 +320,16 @@
 
     <script src="level.js"></script>
     <script>
-        (function() {
+        (async function() {
+            // 等待 CrazyGames SDK 初始化
+            if (typeof CrazyGames !== 'undefined' && CrazyGames.SDK) {
+                try {
+                    await CrazyGames.SDK.init();
+                } catch (e) {
+                    console.warn('CrazyGames SDK 初始化失败，将使用本地存储');
+                }
+            }
+
             if (typeof levelData === 'undefined') {
                 alert('关卡数据加载失败，请检查 level.js 文件是否存在。');
                 return;
@@ -429,28 +438,66 @@
                 setTimeout(()=>{ if(el.parentNode) el.remove(); }, duration+500);
             }
 
-            // ==================== 持久化存储 ====================
-            function saveProgress() {
-                try {
-                    const data = { totalScore, completedLevels: Array.from(completedLevels), currentLevelIndex, lives, lastRecoveryTime, doubleHintCount };
-                    localStorage.setItem('hanzi_game_progress', JSON.stringify(data));
-                } catch(e) {}
+            // ==================== 持久化存储 (CrazyGames + 本地降级) ====================
+            const STORAGE_KEY = 'hanzi_game_progress';
+
+            async function saveProgress() {
+                const data = {
+                    totalScore,
+                    completedLevels: Array.from(completedLevels),
+                    currentLevelIndex,
+                    lives,
+                    lastRecoveryTime,
+                    doubleHintCount
+                };
+                const json = JSON.stringify(data);
+                // 本地存储（同步，确保不被阻塞）
+                try { localStorage.setItem(STORAGE_KEY, json); } catch(e) {}
+                // CrazyGames 云端存储（异步）
+                if (typeof CrazyGames !== 'undefined' && CrazyGames.SDK && CrazyGames.SDK.data) {
+                    try {
+                        await CrazyGames.SDK.data.set(STORAGE_KEY, json);
+                    } catch(e) {
+                        console.warn('CrazyGames 保存失败，已使用本地存储');
+                    }
+                }
             }
-            function loadProgress() {
+
+            async function loadProgress() {
+                // 1. 尝试从 CrazyGames 加载
+                if (typeof CrazyGames !== 'undefined' && CrazyGames.SDK && CrazyGames.SDK.data) {
+                    try {
+                        const raw = await CrazyGames.SDK.data.get(STORAGE_KEY);
+                        if (raw) {
+                            const data = JSON.parse(raw);
+                            applyProgressData(data);
+                            // 同步到本地
+                            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                            return;
+                        }
+                    } catch(e) {
+                        console.warn('CrazyGames 加载失败，尝试本地存储');
+                    }
+                }
+                // 2. 降级到本地存储
                 try {
-                    const raw = localStorage.getItem('hanzi_game_progress');
+                    const raw = localStorage.getItem(STORAGE_KEY);
                     if (raw) {
                         const data = JSON.parse(raw);
-                        totalScore = data.totalScore || 0;
-                        completedLevels = new Set(data.completedLevels || []);
-                        currentLevelIndex = data.currentLevelIndex || 0;
-                        lives = data.lives != null ? data.lives : 3;
-                        lastRecoveryTime = data.lastRecoveryTime || Date.now();
-                        doubleHintCount = data.doubleHintCount || 0;
-                        if (currentLevelIndex >= levelData.length) currentLevelIndex = levelData.length - 1;
-                        if (currentLevelIndex < 0) currentLevelIndex = 0;
+                        applyProgressData(data);
                     }
                 } catch(e) {}
+            }
+
+            function applyProgressData(data) {
+                totalScore = data.totalScore || 0;
+                completedLevels = new Set(data.completedLevels || []);
+                currentLevelIndex = data.currentLevelIndex || 0;
+                lives = data.lives != null ? data.lives : MAX_LIVES;
+                lastRecoveryTime = data.lastRecoveryTime || Date.now();
+                doubleHintCount = data.doubleHintCount || 0;
+                if (currentLevelIndex >= levelData.length) currentLevelIndex = levelData.length - 1;
+                if (currentLevelIndex < 0) currentLevelIndex = 0;
             }
 
             // ==================== 生命值与恢复倒计时 ====================
@@ -667,17 +714,13 @@
                 adOverlay.style.display = 'none';
             }
 
-            // ==================== 广告系统（CrazyGames + 模拟降级） ====================
+            // ==================== 广告系统 (CrazyGames + 模拟降级) ====================
             function showAd(title, subtitle, callback) {
-                // 尝试使用 CrazyGames 广告
                 if (typeof CrazyGames !== 'undefined' && CrazyGames.SDK && CrazyGames.SDK.ad) {
                     CrazyGames.SDK.ad.requestAd('midgame', {
-                        onAdStarted: () => {
-                            isPaused = true;
-                        },
+                        onAdStarted: () => { isPaused = true; },
                         onAdError: (err) => {
                             console.warn('CrazyGames 广告加载失败，降级为模拟广告', err);
-                            // 降级为模拟广告
                             showMockAd(title, subtitle, callback);
                         },
                         onAdFinished: () => {
@@ -686,12 +729,10 @@
                         }
                     });
                 } else {
-                    // 无 CrazyGames SDK，模拟广告
                     showMockAd(title, subtitle, callback);
                 }
             }
 
-            // 模拟广告（保留原有逻辑）
             function showMockAd(title, subtitle, callback) {
                 if (adCountdownTimer) clearInterval(adCountdownTimer);
                 adCallback = callback;
@@ -906,10 +947,8 @@
             levelSelectOverlay.addEventListener('click', (e) => { if (e.target === levelSelectOverlay) { levelSelectOverlay.style.display = 'none'; if (isPaused && isGameActive) isPaused = false; } });
             resultOverlay.addEventListener('click', (e) => { if (e.target === resultOverlay) resultOverlay.style.display = 'none'; });
 
-            // ==================== 按钮事件 ====================
             btnRevive.addEventListener('click', reviveLife);
 
-            // ==================== 窗口事件 ====================
             window.addEventListener('resize', () => setTimeout(redrawCanvas, 250));
             window.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
@@ -919,9 +958,9 @@
                 }
             });
 
-            // ==================== 初始化 ====================
-            function init() {
-                loadProgress();
+            // ==================== 启动游戏 ====================
+            async function init() {
+                await loadProgress();  // 从 CrazyGames 或本地加载存档
                 if (currentLevelIndex >= levelData.length) currentLevelIndex = 0;
                 if (currentLevelIndex < 0) currentLevelIndex = 0;
                 updateScoreDisplay();
@@ -931,8 +970,9 @@
                 loadLevel(currentLevelIndex);
                 setTimeout(redrawCanvas, 200);
             }
+
             init();
-            console.log('🀄 汉字拆字大师 - CrazyGames 广告已接入');
+            console.log('🀄 汉字拆字大师 - CrazyGames Data + Ad 已就绪');
         })();
     </script>
 </body>
