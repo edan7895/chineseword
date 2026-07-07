@@ -272,16 +272,17 @@
     <div id="toastContainer"></div>
 
     <script src="level.js"></script>
-
     <script>
         (async function() {
             // ---- 初始化 CrazyGames SDK ----
+            let crazyAdAvailable = false;
             if (typeof CrazyGames !== 'undefined' && CrazyGames.SDK) {
                 try {
                     await CrazyGames.SDK.init();
+                    crazyAdAvailable = true;
                     console.log('CrazyGames SDK ready');
                 } catch (e) {
-                    console.warn('CrazyGames SDK init failed, continue without it');
+                    console.warn('CrazyGames SDK init failed, will use mock ads');
                 }
             }
 
@@ -332,7 +333,7 @@
             // 生命值系统
             let lives = 3;
             const MAX_LIVES = 3;
-            const RECOVERY_INTERVAL = 5 * 60 * 1000; // 5分钟
+            const RECOVERY_INTERVAL = 5 * 60 * 1000;
             let lastRecoveryTime = Date.now();
             let recoveryTimerInterval = null;
 
@@ -631,29 +632,28 @@
                 adOverlay.style.display = 'none';
             }
 
-            // ==================== 广告系统 (CrazyGames 真实广告 + 模拟降级) ====================
+            // ==================== 广告系统（改进版） ====================
             function showAd(title, subtitle, callback) {
-                // 如果 CrazyGames SDK 可用，尝试真实广告
-                if (typeof CrazyGames !== 'undefined' && CrazyGames.SDK && CrazyGames.SDK.ad) {
-                    let resolved = false;
-                    // 3秒超时：若真实广告迟迟未响应，自动降级
-                    const timeout = setTimeout(() => {
-                        if (!resolved) {
-                            console.warn('CrazyGames 广告超时，降级为模拟广告');
-                            resolved = true;
-                            showMockAd(title, subtitle, callback);
-                        }
-                    }, 3000);
-
+                if (!crazyAdAvailable) {
+                    showMockAd(title, subtitle, callback);
+                    return;
+                }
+                let resolved = false;
+                const timeout = setTimeout(() => {
+                    if (!resolved) {
+                        console.warn('CrazyGames ad timeout, fallback to mock');
+                        resolved = true;
+                        showMockAd(title, subtitle, callback);
+                    }
+                }, 3000);
+                try {
                     CrazyGames.SDK.ad.requestAd('midgame', {
-                        onAdStarted: () => {
-                            isPaused = true;
-                        },
+                        onAdStarted: () => { isPaused = true; },
                         onAdError: (err) => {
                             if (resolved) return;
                             clearTimeout(timeout);
                             resolved = true;
-                            console.warn('CrazyGames 广告错误，降级为模拟广告', err);
+                            console.warn('CrazyGames ad error:', err);
                             showMockAd(title, subtitle, callback);
                         },
                         onAdFinished: () => {
@@ -664,13 +664,16 @@
                             if (callback) callback();
                         }
                     });
-                } else {
-                    // 无 SDK，直接模拟
-                    showMockAd(title, subtitle, callback);
+                } catch (e) {
+                    clearTimeout(timeout);
+                    if (!resolved) {
+                        resolved = true;
+                        console.warn('CrazyGames ad exception:', e);
+                        showMockAd(title, subtitle, callback);
+                    }
                 }
             }
 
-            // 模拟广告（完全保留您原来的逻辑）
             function showMockAd(title, subtitle, callback) {
                 if (adCountdownTimer) clearInterval(adCountdownTimer);
                 adCallback = callback;
@@ -705,7 +708,7 @@
             }
             btnCloseAd.addEventListener('click', () => { if (btnCloseAd.classList.contains('visible')) closeAd(); });
 
-            // ==================== 提示系统（双倍道具） ====================
+            // ==================== 提示系统 ====================
             function updateHintAvailability() {
                 const totalAllowed = MAX_HINTS + doubleHintCount;
                 btnHint.disabled = hintUsedCount >= totalAllowed;
@@ -751,7 +754,7 @@
                 });
             });
 
-            // ==================== 每日挑战（保持不变） ====================
+            // ==================== 每日挑战 ====================
             const DAILY_KEY = 'hanzi_daily_challenge';
             function getTodayStr() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
             function loadDailyData() {
@@ -816,7 +819,7 @@
                 overlay.addEventListener('click', (e) => { if (e.target === overlay) { overlay.remove(); if (isPaused && isGameActive) isPaused = false; } });
             });
 
-            // ==================== 结果弹窗与科普 ====================
+            // ==================== 结果弹窗 ====================
             function getCharDescription(character) {
                 const level = levelData.find(l => l.character === character);
                 if (level && level.description) return level.description;
@@ -898,9 +901,9 @@
                 }
             });
 
-            // ==================== Banner 广告（非阻塞） ====================
+            // ==================== Banner 广告 ====================
             async function initBanner() {
-                if (typeof CrazyGames !== 'undefined' && CrazyGames.SDK && CrazyGames.SDK.banner) {
+                if (crazyAdAvailable && CrazyGames.SDK.banner) {
                     try {
                         await CrazyGames.SDK.banner.requestResponsiveBanner("crazy-banner");
                         console.log('Banner loaded');
@@ -921,10 +924,10 @@
                 updateHintAvailability();
                 loadLevel(currentLevelIndex);
                 setTimeout(redrawCanvas, 200);
-                initBanner();   // 加载 Banner
+                initBanner();
             }
             init();
-            console.log('🀄 汉字拆字大师 - CrazyGames 广告已接入');
+            console.log('🀄 汉字拆字大师 - 广告降级保护已激活');
         })();
     </script>
 </body>
